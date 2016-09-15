@@ -1,8 +1,6 @@
 require "test_helper"
 
 class PreferencesForm < OnForm::Form
-  attr_reader :customer
-
   expose :customer => %i(name email phone_number friendly)
 
   def initialize(customer)

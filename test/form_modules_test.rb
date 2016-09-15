@@ -1,8 +1,6 @@
 require "test_helper"
 
 module AccountFormComponent
-  attr_reader :customer
-
   def self.included(form)
     form.expose :customer => %i(email phone_number)
   end

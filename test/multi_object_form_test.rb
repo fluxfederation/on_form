@@ -1,14 +1,23 @@
 require "test_helper"
 
 class HouseListingForm < OnForm::Form
-  attr_reader :house, :vendor
-
   expose :house => %i(street_number street_name city),
          :vendor => %i(name phone_number)
 
   def initialize(house)
     @house = house
     @vendor = house.vendor
+  end
+end
+
+class DelegatedHouseListingForm < OnForm::Form
+  delegate :vendor, :to => :house
+
+  expose :house => %i(street_number street_name city),
+         :vendor => %i(name phone_number)
+
+  def initialize(house)
+    @house = house
   end
 end
 
@@ -54,5 +63,12 @@ describe "multi-record form" do
     @house.reload.street_name.must_equal "Main Street"
     @vendor.reload.phone_number.must_equal "123-4567"
     @vendor.name.must_equal "Test User"
+  end
+
+  it "supports delegation for accessing related records" do
+    @house_listing_form = DelegatedHouseListingForm.new(@house)
+    @house_listing_form.update!(:street_name => "Small Street", :phone_number => "222-3333")
+    @house.reload.street_name.must_equal "Small Street"
+    @vendor.reload.phone_number.must_equal "222-3333"
   end
 end

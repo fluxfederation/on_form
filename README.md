@@ -56,8 +56,6 @@ Let's wrap the customer object in a form object.  Ideally we'd call this `@custo
 Now we need to make our form object.  At this point we need to tell the form object which attributes on the model we want to expose.  (In this example we have just one model and a couple of attributes, but you wouldn't bother using this library if this was all you had.)
 
 	class PreferencesForm < OnForm::Form
-	  attr_reader :customer
-
 	  expose :customer => %i(name email phone_number)
 
 	  def initialize(customer)
@@ -76,12 +74,10 @@ You aren't limited to having one primary model - if your form is made up of mult
 In this example, the new models we're exposing are associated with the first one, so we don't need to pass them in to the constructor.
 
 	class HouseListingForm < OnForm::Form
-	  attr_reader :house, :vendor
-
-	  expose :house => %i(street_number street_address city),
+	  expose :house => %i(street_number street_name city),
 	         :vendor => %i(name phone_number)
 
-	  def initialize(house, :vendor)
+	  def initialize(house)
 	    @house = house
 	    @vendor = house.vendor
 	  end
@@ -89,7 +85,26 @@ In this example, the new models we're exposing are associated with the first one
 
 Transactions will automatically be started so that _all_ database updates will be rolled back if _any_ record fails to save (for example, due to a validation error).
 
-Note that the keys are the name of the methods on the form object which return the records, not the class names.  In this example, vendor might actually be an instance of our `Customer` model from the earlier examples.  You might also prefer to use `delegate` rather than setting up `attr_reader` and initialising in the form object constructor - up to you.
+Note that the keys are the name of the methods on the form object which return the records, not the class names.  In this example, vendor might actually be an instance of our `Customer` model from the earlier examples.
+
+### Model accessor methods
+
+In the previous example, the constructor set `@house` and `@vendor` because these variables correspond to the names passed to `expose`.  `expose` will automatically add an `attr_reader` for each key it's given, meaning you only need to set the instance variables.
+
+But if you prefer, you can define a method with the same name yourself, for example using delegation.  `expose` won't run `attr_reader` if you've already defined the method, and there's no requirement to set an instance variable.
+
+	class HouseListingForm < OnForm::Form
+	  delegate :vendor, :to => :house
+
+	  expose :house => %i(street_number street_name city),
+	         :vendor => %i(name phone_number)
+
+	  def initialize(house)
+	    @house = house
+	  end
+	end
+
+You can also define your own method over the top of the `attr_reader`.  Just remember it will be called more than once, so it should be idempotent.
 
 ### Reusing and extending forms
 
@@ -104,8 +119,6 @@ This works well for some use cases, but can quickly become cumbersome if you hav
 You can use standard Ruby hooks for this:
 
 	module AccountFormComponent
-	  attr_reader :customer
-
 	  def self.included(form)
 	    form.expose :customer => %i(email phone_number)
 	  end

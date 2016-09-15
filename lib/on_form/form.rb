@@ -18,14 +18,21 @@ module OnForm
 
     def self.expose(backing_models_and_attribute_names)
       backing_models_and_attribute_names.each do |backing_model_name, attribute_names|
+        backing_model_name = backing_model_name.to_sym
+        expose_backing_model(backing_model_name)
         attribute_names.each do |attribute_name|
           expose_attribute(backing_model_name, attribute_name)
         end
       end
     end
 
+    def self.expose_backing_model(backing_model_name)
+      unless instance_methods.include?(backing_model_name)
+        attr_reader backing_model_name
+      end
+    end
+
     def self.expose_attribute(backing_model_name, attribute_name)
-      backing_model_name = backing_model_name.to_sym
       exposed_attributes[backing_model_name] << attribute_name.to_sym
 
       [attribute_name, "#{attribute_name}_before_type_cast"].each do |attribute_method|

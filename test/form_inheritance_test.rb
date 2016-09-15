@@ -1,8 +1,6 @@
 require "test_helper"
 
 class ParentForm < OnForm::Form
-  attr_reader :customer
-
   expose :customer => %i(name phone_number)
 
   def initialize(customer)
@@ -16,8 +14,6 @@ class ChildForm < ParentForm
 end
 
 class CustomerHouseListingForm < OnForm::Form
-  attr_reader :house, :vendor
-
   expose :house => %i(street_number street_name city),
          :vendor => %i(name phone_number)
 
