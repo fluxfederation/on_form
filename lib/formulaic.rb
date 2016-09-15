@@ -1,5 +1,7 @@
+require "active_model"
+require "active_record"
 require "formulaic/version"
-
-module Formulaic
-  # Your code goes here...
-end
+require "formulaic/attributes"
+require "formulaic/errors"
+require "formulaic/saving"
+require "formulaic/form"
