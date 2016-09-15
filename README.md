@@ -42,11 +42,11 @@ Let's wrap the customer object in a form object.  Ideally we'd call this `@custo
 
 	class PreferencesController
 	  def show
-	    @customer = CustomerForm.new(Customer.find(params[:id]))
+	    @customer = PreferencesForm.new(Customer.find(params[:id]))
 	  end
 
 	  def update
-	    @customer = CustomerForm.new(Customer.find(params[:id]))
+	    @customer = PreferencesForm.new(Customer.find(params[:id]))
 	    @customer.update!(params[:customer])
 	  rescue ActiveRecord::RecordInvalid
 	    render :show
@@ -55,7 +55,7 @@ Let's wrap the customer object in a form object.  Ideally we'd call this `@custo
 
 Now we need to make our form object.  At this point we need to tell the form object which attributes on the model we want to expose.  (I'm just going to put a couple in here, but you wouldn't bother using this library if this was all you had.)
 
-	class CustomerForm < OnForm::Form
+	class PreferencesForm < OnForm::Form
 	  attr_reader :customer
 
 	  expose :customer => %i(name email phone_number)
