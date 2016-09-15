@@ -38,7 +38,7 @@ Let's say you have a big fat legacy model called `Customer`, and you have a pref
 	  end
 	end
 
-Let's wrap the customer object in a form object.  Ideally we'd call this @customer_form, but you may not feel you have time to go and update all your views yet, so in this example we'll keep calling it @customer.
+Let's wrap the customer object in a form object.  Ideally we'd call this `@customer_form`, but you may not feel you have time to go and update all your view code, so in this example we'll keep calling it `@customer`.
 
 	class PreferencesController
 	  def show

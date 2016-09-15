@@ -1,8 +1,7 @@
 module Formulaic
   module Attributes
-    def read_attribute_for_validation(attribute_name)
-      send(attribute_name)
-    end
+    # the individual attribute methods are introduced by the expose_attribute class method.
+    # here we introduce some methods used for the attribute set as a whole.
 
     def [](attribute_name)
       send(attribute_name)
@@ -10,6 +9,10 @@ module Formulaic
 
     def []=(attribute_name, attribute_value)
       send("#{attribute_name}=", attribute_value)
+    end
+
+    def read_attribute_for_validation(attribute_name)
+      send(attribute_name)
     end
 
   private

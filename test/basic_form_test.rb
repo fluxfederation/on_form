@@ -1,25 +1,25 @@
-require 'test_helper'
+require "test_helper"
 
-class Customer < ActiveRecord::Base
-  validates_presence_of :name, :email, :phone_number
-  validate :base_validation
+describe "a basic single-model form" do
+  class Customer < ActiveRecord::Base
+    validates_presence_of :name, :email, :phone_number
+    validate :base_validation
 
-  def base_validation
-    errors.add(:base, "Customer needs to be friendly") unless friendly?
+    def base_validation
+      errors.add(:base, "Customer needs to be friendly") unless friendly?
+    end
   end
-end
 
-class CustomerForm < Formulaic::Form
-  attr_reader :customer
+  class CustomerForm < Formulaic::Form
+    attr_reader :customer
 
-  expose :customer => %i(name email phone_number friendly)
+    expose :customer => %i(name email phone_number friendly)
 
-  def initialize(customer)
-    @customer = customer
+    def initialize(customer)
+      @customer = customer
+    end
   end
-end
 
-describe CustomerForm do
   before do
     Customer.delete_all
     @customer = Customer.create!(name: "Test User", email: "test@example.com", phone_number: "123-4567")
