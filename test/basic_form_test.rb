@@ -10,7 +10,7 @@ describe "a basic single-model form" do
     end
   end
 
-  class CustomerForm < Formulaic::Form
+  class CustomerForm < OnForm::Form
     attr_reader :customer
 
     expose :customer => %i(name email phone_number friendly)

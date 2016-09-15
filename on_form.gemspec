@@ -1,11 +1,11 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'formulaic/version'
+require 'on_form/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "formulaic"
-  spec.version       = Formulaic::VERSION
+  spec.name          = "on_form"
+  spec.version       = OnForm::VERSION
   spec.authors       = ["Will Bryant"]
   spec.email         = ["will.bryant@gmail.com"]
 

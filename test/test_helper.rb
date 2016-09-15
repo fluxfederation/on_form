@@ -1,5 +1,5 @@
 require 'minitest/autorun'
-require 'formulaic'
+require 'on_form'
 require 'active_record'
 
 ActiveRecord::Base.configurations = YAML::load(IO.read(File.join(File.dirname(__FILE__), "database.yml")))

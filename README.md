@@ -1,4 +1,4 @@
-# Formulaic
+# OnForm
 
 A pragmatism-first library to help Rails applications migrate from complex nested attribute models to tidy form objects.
 
@@ -7,7 +7,7 @@ A pragmatism-first library to help Rails applications migrate from complex neste
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'formulaic'
+gem 'on_form'
 ```
 
 And then execute:
@@ -16,7 +16,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install formulaic
+    $ gem install on_form
 
 ## Usage
 
@@ -55,7 +55,7 @@ Let's wrap the customer object in a form object.  Ideally we'd call this `@custo
 
 Now we need to make our form object.  At this point we need to tell the form object which attributes on the model we want to expose.  (I'm just going to put a couple in here, but you wouldn't bother using this library if this was all you had.)
 
-	class CustomerForm < Formulaic::Form
+	class CustomerForm < OnForm::Form
 	  attr_reader :customer
 
 	  expose :customer => %i(name email phone_number)
@@ -71,7 +71,7 @@ It will automatically write those exposed attributes back onto the models, and *
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/powershop/formulaic.
+Bug reports and pull requests are welcome on GitHub at https://github.com/powershop/on_form.
 
 
 ## License

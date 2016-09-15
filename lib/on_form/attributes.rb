@@ -1,4 +1,4 @@
-module Formulaic
+module OnForm
   module Attributes
     # the individual attribute methods are introduced by the expose_attribute class method.
     # here we introduce some methods used for the attribute set as a whole.

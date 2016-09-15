@@ -1,4 +1,4 @@
-module Formulaic
+module OnForm
   class Form
     include Attributes
     include Errors

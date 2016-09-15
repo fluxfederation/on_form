@@ -1,4 +1,4 @@
-module Formulaic
+module OnForm
   module Errors
     def errors
       @errors ||= collect_errors
