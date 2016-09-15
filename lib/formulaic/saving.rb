@@ -13,12 +13,12 @@ module Formulaic
     end
 
     def update(attributes)
-      write_attributes(attributes)
+      self.attributes = attributes
       save
     end
 
     def update!(attributes)
-      write_attributes(attributes)
+      self.attributes = attributes
       save!
     end
 

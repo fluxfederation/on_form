@@ -35,6 +35,20 @@ describe "a basic single-model form" do
     @customer.name.must_equal "New Name"
   end
 
+  it "lists attribute names" do
+    # expect strings back for compatibility with ActiveRecord
+    @customer_form.attribute_names.sort.must_equal %w(name email phone_number friendly).sort
+  end
+
+  it "returns all attributes in a hash from attributes" do
+    @customer_form.attributes.must_equal({"name" => "Test User", "email" => "test@example.com", "phone_number" => "123-4567", "friendly" => true})
+  end
+
+  it "sets exposed attribute values from mass assignment to attributes=" do
+    @customer_form.attributes = {name: "New Name"}
+    @customer.name.must_equal "New Name"
+  end
+
   it "saves written attribute values" do
     @customer_form.name = "New Name 1"
     @customer_form.save!
