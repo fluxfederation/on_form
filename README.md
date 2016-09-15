@@ -20,7 +20,7 @@ Or install it yourself as:
 
 ## Usage
 
-### Start by wrapping one model
+### Simple example of wrapping a model
 
 Let's say you have a big fat legacy model called `Customer`, and you have a preferences controller:
 
@@ -53,7 +53,7 @@ Let's wrap the customer object in a form object.  Ideally we'd call this `@custo
 	  end
 	end
 
-Now we need to make our form object.  At this point we need to tell the form object which attributes on the model we want to expose.  (I'm just going to put a couple in here, but you wouldn't bother using this library if this was all you had.)
+Now we need to make our form object.  At this point we need to tell the form object which attributes on the model we want to expose.  (In this example we have just one model and a couple of attributes, but you wouldn't bother using this library if this was all you had.)
 
 	class PreferencesForm < OnForm::Form
 	  attr_reader :customer
@@ -90,6 +90,14 @@ In this example, the new models we're exposing are associated with the first one
 Transactions will automatically be started so that _all_ database updates will be rolled back if _any_ record fails to save (for example, due to a validation error).
 
 Note that the keys are the name of the methods on the form object which return the records, not the class names.  In this example, vendor might actually be an instance of our `Customer` model from the earlier examples.  You might also prefer to use `delegate` rather than setting up `attr_reader` and initialising in the form object constructor - up to you.
+
+### Form inheritance
+
+You can descend form classes from other form classes and expose additional models or additional attributes on existing models.
+
+	class AdminHouseListingForm < HouseListingForm
+	  expose :house => %i(listing_approved)
+	end
 
 ## Contributing
 

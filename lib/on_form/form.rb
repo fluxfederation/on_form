@@ -7,7 +7,13 @@ module OnForm
     extend ActiveModel::Translation
 
     def self.exposed_attributes
-      @exposed_attributes ||= {}
+      @exposed_attributes ||= Hash.new { |h, k| h[k] = [] }
+    end
+
+    class << self
+      def inherited(child)
+        exposed_attributes.each { |k, v| child.exposed_attributes[k].concat(v) }
+      end
     end
 
     def self.expose(backing_models_and_attribute_names)
@@ -20,7 +26,7 @@ module OnForm
 
     def self.expose_attribute(backing_model_name, attribute_name)
       backing_model_name = backing_model_name.to_sym
-      exposed_attributes[backing_model_name] = (exposed_attributes[backing_model_name] || []) + [attribute_name.to_sym]
+      exposed_attributes[backing_model_name] << attribute_name.to_sym
 
       [attribute_name, "#{attribute_name}_before_type_cast"].each do |attribute_method|
         define_method(attribute_method) { backing_model(backing_model_name).send(attribute_method) }

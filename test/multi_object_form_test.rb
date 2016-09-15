@@ -15,6 +15,7 @@ end
 describe "multi-record form" do
   before do
     Customer.delete_all
+    House.delete_all
     @vendor = Customer.create!(name: "Test User", email: "test@example.com", phone_number: "123-4567")
     @house = House.create!(:vendor => @vendor, :street_number => "8/90", :street_name => "Main Street", :city => "Townsville")
     @house_listing_form = HouseListingForm.new(@house)

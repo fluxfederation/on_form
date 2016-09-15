@@ -11,10 +11,11 @@ ActiveRecord::Schema.define(:version => 0) do
   add_index :customers, :email, unique: true
 
   create_table :houses, :force => true do |t|
-    t.string   :street_number, null: false
-    t.string   :street_name,   null: false
-    t.string   :city,          null: false
-    t.integer  :vendor_id,     null: false
-    t.timestamps               null: false
+    t.string   :street_number,    null: false
+    t.string   :street_name,      null: false
+    t.string   :city,             null: false
+    t.integer  :vendor_id,        null: false
+    t.boolean  :listing_approved, null: false, default: false
+    t.timestamps                  null: false
   end
 end
