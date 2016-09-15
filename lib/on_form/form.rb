@@ -1,6 +1,7 @@
 module OnForm
   class Form
     include Attributes
+    include MultiparameterAttributes
     include Errors
     include Saving
 

@@ -11,6 +11,14 @@ module OnForm
       send("#{attribute_name}=", attribute_value)
     end
 
+    def read_attribute_for_validation(attribute_name)
+      send(attribute_name)
+    end
+
+    def write_attribute(attribute_name, attribute_value)
+      send("#{attribute_name}=", attribute_value)
+    end
+
     def attribute_names
       self.class.exposed_attributes.values.reduce(:+).collect(&:to_s)
     end
@@ -22,13 +30,15 @@ module OnForm
     end
 
     def attributes=(attributes)
+      multiparameter_attributes = {}
       attributes.each do |attribute_name, attribute_value|
-        self[attribute_name] = attribute_value
+        if attribute_name.to_s.include?('(')
+          multiparameter_attributes[attribute_name] = attribute_value
+        else
+          write_attribute(attribute_name, attribute_value)
+        end
       end
-    end
-
-    def read_attribute_for_validation(attribute_name)
-      send(attribute_name)
+      assign_multiparameter_attributes(multiparameter_attributes)
     end
 
   private
@@ -38,6 +48,12 @@ module OnForm
 
     def backing_models
       self.class.exposed_attributes.keys.collect { |backing_model_name| backing_model(backing_model_name) }
+    end
+
+    def backing_object_for_attribute(attribute_name)
+      self.class.exposed_attributes.each do |backing_model_name, attribute_names|
+        break backing_model(backing_model_name) if attribute_names.include?(attribute_name)
+      end
     end
   end
 end
