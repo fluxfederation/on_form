@@ -73,7 +73,7 @@ It will automatically write those exposed attributes back onto the models, and *
 
 You aren't limited to having one primary model - if your form is made up of multiple models pass more than one key to `expose`, or call it multiple times if you prefer.  They'll automatically be saved in the same order you declared them.
 
-In this example, the new models we're exposing are associated with the first one, so we don't need to pass them in to the constructor:
+In this example, the new models we're exposing are associated with the first one, so we don't need to pass them in to the constructor.
 
 	class HouseListingForm < OnForm::Form
 	  attr_reader :house, :vendor
@@ -91,13 +91,49 @@ Transactions will automatically be started so that _all_ database updates will b
 
 Note that the keys are the name of the methods on the form object which return the records, not the class names.  In this example, vendor might actually be an instance of our `Customer` model from the earlier examples.  You might also prefer to use `delegate` rather than setting up `attr_reader` and initialising in the form object constructor - up to you.
 
-### Form inheritance
+### Reusing and extending forms
 
 You can descend form classes from other form classes and expose additional models or additional attributes on existing models.
 
 	class AdminHouseListingForm < HouseListingForm
 	  expose :house => %i(listing_approved)
 	end
+
+This works well for some use cases, but can quickly become cumbersome if you have a lot of partial form reuse, and it may not be obvious to other developers that the parent form is also used to derive the other forms.  Consider breaking your form parts into reuseable modules, and defining each form separately.
+
+You can use standard Ruby hooks for this:
+
+	module AccountFormComponent
+	  attr_reader :customer
+
+	  def self.included(form)
+	    form.expose :customer => %i(email phone_number)
+	  end
+	end
+
+	class NewAccountForm < OnForm::Form
+	  include AccountFormComponent
+
+	  expose :customer => %i(name)
+
+	  def initialize(customer)
+	    @customer = customer
+	  end
+	end
+
+	class EditAccountForm < OnForm::Form
+	  include AccountFormComponent
+
+	  delegate :name, to: :customer
+
+	  def initialize(customer)
+	    @customer = customer
+	  end
+	end
+
+In this example the initialize method could actually be moved to the module as well, but that makes it harder to compose forms from multiple modules.
+
+If you prefer, you can use the Rails `included` block syntax in the module instead of `def self.included`.
 
 ## Contributing
 
