@@ -1,5 +1,10 @@
 module Formulaic
   module Saving
+    def valid?
+      reset_errors
+      backing_models.collect { |backing_model| backing_model.valid? }.reduce(:|)
+    end
+
     def save!
       reset_errors
       backing_models.each { |backing_model| backing_model.save! }

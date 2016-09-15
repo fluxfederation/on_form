@@ -31,7 +31,7 @@ Let's say you have a big fat legacy model called `Customer`, and you have a pref
 
 	  def update
 	    @customer = Customer.find(params[:id])
-	    @customer.update!(params[:customer])
+	    @customer.update!(params[:customer].permit(:name, :email, :phone_number)
 	    redirect_to preferences_path(@customer)
 	  rescue ActiveRecord::RecordInvalid
 	    render :show

@@ -58,12 +58,18 @@ describe "a basic single-model form" do
     @customer.reload.name.must_equal "New Name 2"
   end
 
-  it "raises ActiveRecord::RecordInvalid if a validation fails on save! or update!" do
+  it "returns false from valid? if a validation fails" do
+    @customer_form.valid?.must_equal true
+    @customer_form.email = nil
+    @customer_form.valid?.must_equal false
+  end
+
+  it "raises ActiveRecord::RecordInvalid from save! or update! if a validation fails" do
     proc { @customer_form.update!(email: nil) }.must_raise(ActiveRecord::RecordInvalid)
     proc { @customer_form.save! }.must_raise(ActiveRecord::RecordInvalid)
   end
 
-  it "returns false if a validation fails on save or update" do
+  it "returns false from save or update if a validation fails" do
     @customer_form.update(email: nil).must_equal false
     @customer_form.save.must_equal false
   end
