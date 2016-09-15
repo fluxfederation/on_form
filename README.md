@@ -65,7 +65,9 @@ Now we need to make our form object.  At this point we need to tell the form obj
 	  end
 	end
 
-The form object responds to the usual persistance methods like `email`, `email=`, `save`, `save!`, `update`, and `update!`.  It will automatically write those exposed attributes back onto the models, and *it exposes any validation errors from those fields on the form object itself* - you don't have to copy them back manually or move your field validation code over to get started.
+The form object responds to the usual persistance methods like `email`, `email=`, `save`, `save!`, `update`, and `update!`.  
+
+It will automatically write those exposed attributes back onto the models, and *it exposes any validation errors from those fields on the form object itself* - you don't have to copy them back manually or move your field validation code over to get started.  It'll also expose any errors on base on the models whose attributes you exposed.
 
 ## Contributing
 

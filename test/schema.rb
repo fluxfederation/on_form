@@ -3,6 +3,7 @@ ActiveRecord::Schema.define(:version => 0) do
     t.string   :name
     t.string   :email
     t.string   :phone_number
+    t.boolean  :friendly, default: true, null: false
   end
 
   add_index :customers, :email, unique: true

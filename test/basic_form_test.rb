@@ -2,12 +2,17 @@ require 'test_helper'
 
 class Customer < ActiveRecord::Base
   validates_presence_of :name, :email, :phone_number
+  validate :base_validation
+
+  def base_validation
+    errors.add(:base, "Customer needs to be friendly") unless friendly?
+  end
 end
 
 class CustomerForm < Formulaic::Form
   attr_reader :customer
 
-  expose :customer => %i(name email phone_number)
+  expose :customer => %i(name email phone_number friendly)
 
   def initialize(customer)
     @customer = customer
@@ -63,5 +68,12 @@ describe CustomerForm do
       @customer_form.errors.full_messages.sort.must_equal ["Email can't be blank", "Name can't be blank"]
       @customer_form.errors[:name].must_equal ["can't be blank"]
     end
+  end
+
+  it "exposes validation errors on base" do
+    @customer_form.friendly = false
+    @customer_form.save.must_equal false
+    @customer_form.errors.full_messages.must_equal ["Customer needs to be friendly"]
+    @customer_form.errors[:base].must_equal ["Customer needs to be friendly"]
   end
 end
