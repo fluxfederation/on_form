@@ -26,6 +26,12 @@ describe "a basic single-model form" do
     @customer_form = CustomerForm.new(@customer)
   end
 
+  it "doesn't allow access to un-exposed attributes" do
+    proc { @customer_form.created_at }.must_raise(NoMethodError)
+    proc { @customer_form.verified }.must_raise(NoMethodError)
+    proc { @customer_form.verified = true }.must_raise(NoMethodError)
+  end
+
   it "returns exposed attribute values from attribute reader methods" do
     @customer_form.name.must_equal "Test User"
   end

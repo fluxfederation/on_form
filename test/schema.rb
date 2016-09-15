@@ -4,6 +4,8 @@ ActiveRecord::Schema.define(:version => 0) do
     t.string   :email
     t.string   :phone_number
     t.boolean  :friendly, default: true, null: false
+    t.boolean  :verified
+    t.timestamps null: false
   end
 
   add_index :customers, :email, unique: true
