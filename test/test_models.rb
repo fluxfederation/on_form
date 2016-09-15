@@ -6,3 +6,8 @@ class Customer < ActiveRecord::Base
     errors.add(:base, "Customer needs to be friendly") unless friendly?
   end
 end
+
+class House < ActiveRecord::Base
+  validates_presence_of :vendor, :street_number, :street_name, :city
+  belongs_to :vendor, :class_name => 'Customer'
+end
