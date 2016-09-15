@@ -1,15 +1,6 @@
 require "test_helper"
 
 describe "a basic single-model form" do
-  class Customer < ActiveRecord::Base
-    validates_presence_of :name, :email, :phone_number
-    validate :base_validation
-
-    def base_validation
-      errors.add(:base, "Customer needs to be friendly") unless friendly?
-    end
-  end
-
   class CustomerForm < OnForm::Form
     attr_reader :customer
 
