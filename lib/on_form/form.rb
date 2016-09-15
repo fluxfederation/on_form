@@ -36,7 +36,7 @@ module OnForm
     def self.expose_attribute(backing_model_name, attribute_name)
       exposed_attributes[backing_model_name] << attribute_name.to_sym
 
-      [attribute_name, "#{attribute_name}_before_type_cast"].each do |attribute_method|
+      [attribute_name, "#{attribute_name}_before_type_cast", "#{attribute_name}?"].each do |attribute_method|
         define_method(attribute_method) { backing_model(backing_model_name).send(attribute_method) }
       end
       ["#{attribute_name}="].each do |attribute_method|

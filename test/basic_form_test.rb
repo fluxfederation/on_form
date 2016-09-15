@@ -86,6 +86,7 @@ describe "a basic single-model form" do
   end
 
   it "exposes validation errors on base" do
+    @preferences_form.friendly?.must_equal true
     @preferences_form.friendly = false
     @preferences_form.save.must_equal false
     @preferences_form.errors.full_messages.must_equal ["Customer needs to be friendly"]
