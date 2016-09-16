@@ -44,6 +44,10 @@ describe "a basic single-model form" do
     @customer.name.must_equal "New Name"
   end
 
+  it "rejects nil assignments to attributes= with ArgumentError rather than a nil dereference" do
+    proc { @preferences_form.attributes = nil }.must_raise(ArgumentError)
+  end
+
   it "saves written attribute values" do
     @preferences_form.name = "New Name 1"
     @preferences_form.save!

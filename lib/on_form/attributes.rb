@@ -30,6 +30,9 @@ module OnForm
     end
 
     def attributes=(attributes)
+      # match ActiveRecord#attributes= behavior on nil, scalars, etc.
+      raise ArgumentError, "When assigning attributes, you must pass a hash as an argument." unless attributes.is_a?(Hash)
+
       multiparameter_attributes = {}
       attributes.each do |attribute_name, attribute_value|
         attribute_name = attribute_name.to_s
