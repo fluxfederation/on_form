@@ -6,6 +6,9 @@ module OnForm
     include Saving
 
     extend ActiveModel::Translation
+    extend ActiveModel::Callbacks
+
+    define_model_callbacks :save
 
     def self.exposed_attributes
       @exposed_attributes ||= Hash.new { |h, k| h[k] = [] }

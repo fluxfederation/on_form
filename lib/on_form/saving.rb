@@ -14,7 +14,9 @@ module OnForm
     def save!
       reset_errors
       transaction do
-        backing_models.each { |backing_model| backing_model.save! }
+        run_callbacks :save do
+          backing_models.each { |backing_model| backing_model.save! }
+        end
       end
       true
     end
