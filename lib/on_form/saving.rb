@@ -6,7 +6,7 @@ module OnForm
 
     def valid?
       reset_errors
-      backing_models.collect { |backing_model| backing_model.valid? }.reduce(:|)
+      backing_models.collect { |backing_model| backing_model.valid? }.reduce(:&)
     end
 
     def save!

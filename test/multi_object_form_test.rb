@@ -41,6 +41,16 @@ describe "multi-record form" do
     @vendor.reload.phone_number.must_equal "222-3333"
   end
 
+  it "returns false from valid? if a validation fails on the first record" do
+    @house_listing_form.street_number = nil
+    @house_listing_form.valid?.must_equal false
+  end
+
+  it "returns false from valid? if a validation fails on the last record" do
+    @house_listing_form.name = nil
+    @house_listing_form.valid?.must_equal false
+  end
+
   it "applies changes to all models in memory, but rolls back all saves if the first fails validation" do
     proc { @house_listing_form.update!(:street_name => "Small Street", :phone_number => "222-3333", :street_number => nil) }.must_raise ActiveRecord::RecordInvalid
 
