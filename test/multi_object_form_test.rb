@@ -44,11 +44,13 @@ describe "multi-record form" do
   it "returns false from valid? if a validation fails on the first record" do
     @house_listing_form.street_number = nil
     @house_listing_form.valid?.must_equal false
+    @house_listing_form.errors[:street_number].must_equal ["can't be blank"]
   end
 
   it "returns false from valid? if a validation fails on the last record" do
     @house_listing_form.name = nil
     @house_listing_form.valid?.must_equal false
+    @house_listing_form.errors[:name].must_equal ["can't be blank"]
   end
 
   it "applies changes to all models in memory, but rolls back all saves if the first fails validation" do
