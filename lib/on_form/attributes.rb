@@ -32,7 +32,8 @@ module OnForm
     def attributes=(attributes)
       multiparameter_attributes = {}
       attributes.each do |attribute_name, attribute_value|
-        if attribute_name.to_s.include?('(')
+        attribute_name = attribute_name.to_s
+        if attribute_name.include?('(')
           multiparameter_attributes[attribute_name] = attribute_value
         else
           write_attribute(attribute_name, attribute_value)
