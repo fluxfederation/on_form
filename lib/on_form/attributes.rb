@@ -52,8 +52,9 @@ module OnForm
 
     def backing_object_for_attribute(attribute_name)
       self.class.exposed_attributes.each do |backing_model_name, attribute_names|
-        break backing_model(backing_model_name) if attribute_names.include?(attribute_name)
+        return backing_model(backing_model_name) if attribute_names.include?(attribute_name.to_sym)
       end
+      nil
     end
   end
 end
