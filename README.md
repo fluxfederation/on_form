@@ -106,6 +106,22 @@ But if you prefer, you can define a method with the same name yourself, for exam
 
 You can also define your own method over the top of the `attr_reader`.  Just remember it will be called more than once, so it should be idempotent.
 
+### Validations
+
+Validations on the underlying models not only get used, but their validation errors show up on the form's `errors` object directly when you call `valid?` or any of the save/update methods.
+
+But you can also declare validations on the form object itself, which is useful when you have business rules applicable to this form that aren't intrinsic to the domain model.
+
+	class AddEmergencyContactForm < OnForm::Form
+	  expose :customer => %i(next_of_kin_name next_of_kin_phone_number)
+
+	  validates_presence_of :next_of_kin_name, :next_of_kin_phone_number
+
+	  def initialize(customer)
+	    @customer = customer
+	  end
+	end
+
 ### Reusing and extending forms
 
 You can descend form classes from other form classes and expose additional models or additional attributes on existing models.
