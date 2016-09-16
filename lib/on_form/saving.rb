@@ -1,19 +1,31 @@
 module OnForm
   module Saving
+    def self.included(base)
+      base.define_model_callbacks :save
+    end
+
     def transaction(&block)
       with_transactions(backing_models, &block)
     end
 
-    def valid?
-      reset_errors
-      backing_models.collect { |backing_model| backing_model.valid? }.reduce(:&)
+    def invalid?
+      !valid?
     end
 
     def save!
       reset_errors
       transaction do
+        reset_errors
+        unless run_validations!(backing_model_validations: false)
+          raise ActiveRecord::RecordInvalid, self
+        end
         run_callbacks :save do
-          backing_models.each { |backing_model| backing_model.save! }
+          begin
+            backing_models.each { |backing_model| backing_model.save! }
+          rescue ActiveRecord::RecordInvalid
+            collect_errors
+            raise
+          end
         end
       end
       true
@@ -51,6 +63,17 @@ module OnForm
           with_transactions(models, &block)
         end
       end
+    end
+
+    def run_validations!(backing_model_validations: true)
+      super()
+      run_backing_model_validations if backing_model_validations
+      errors.empty?
+    end
+
+    def run_backing_model_validations
+      backing_models.collect { |backing_model| backing_model.valid? }
+      collect_errors
     end
   end
 end

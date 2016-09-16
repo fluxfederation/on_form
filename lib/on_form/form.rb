@@ -1,14 +1,12 @@
 module OnForm
   class Form
+    include ActiveModel::Validations
+    include ActiveModel::Validations::Callbacks
+
     include Attributes
     include MultiparameterAttributes
     include Errors
     include Saving
-
-    extend ActiveModel::Translation
-    extend ActiveModel::Callbacks
-
-    define_model_callbacks :save
 
     def self.exposed_attributes
       @exposed_attributes ||= Hash.new { |h, k| h[k] = [] }
