@@ -20,6 +20,10 @@ Or install it yourself as:
 
 ## Usage
 
+This version of OnForm should work with Rails 5.0 and 4.2.
+
+This version of OnForm depends on both the `activemodel` and `activerecord` gems.  Rails 5.0 has refactored some of the necessary activerecord code across to activemodel, so the activerecord dependency should be dropped once Rails 4.2 support is dropped.
+
 ### Simple example of wrapping a model
 
 Let's say you have a big fat legacy model called `Customer`, and you have a preferences controller:
@@ -194,6 +198,16 @@ You can use standard Ruby hooks for this:
 In this example the initialize method could actually be moved to the module as well, but that makes it harder to compose forms from multiple modules.
 
 If you prefer, you can use the Rails `included` block syntax in the module instead of `def self.included`.
+
+## Development
+
+After checking out the repo, pick the rails version you'd like to run tests against, and run:
+
+	RAILS_VERSION=5.0.0.1 bundle update
+
+You should then be able to run the test suite:
+
+	bundle exec rake
 
 ## Contributing
 
