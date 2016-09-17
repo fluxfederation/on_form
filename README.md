@@ -126,6 +126,8 @@ But you can also declare validations on the form object itself, which is useful 
 	  end
 	end
 
+Note that when you call `save!`, `update!`, or `update_attributes!` on the form object, validation errors from records will still raise `ActiveRecord::RecordInvalid`, but validation errors from validations defined on the form itself will raise `ActiveModel::ValidationError`.  You will usually want to rescue both.
+
 ### Callbacks
 
 You can also use the `before_validation`, `before_save`, `after_save`, and `around_save` validations.  Like ActiveRecord, these will run inside the database transaction when you're calling one of the save or update methods, which is especially useful if you need to take locks on parent records.

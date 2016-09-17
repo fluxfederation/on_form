@@ -17,12 +17,12 @@ module OnForm
       transaction do
         reset_errors
         unless run_validations!(backing_model_validations: false)
-          raise ActiveRecord::RecordInvalid, self
+          raise ActiveModel::ValidationError, self
         end
         run_callbacks :save do
           begin
             backing_models.each { |backing_model| backing_model.save! }
-          rescue ActiveRecord::RecordInvalid
+          rescue ActiveRecord::RecordInvalid, ActiveModel::ValidationError
             collect_errors
             raise
           end
@@ -33,7 +33,7 @@ module OnForm
 
     def save
       save!
-    rescue ActiveRecord::RecordInvalid
+    rescue ActiveRecord::RecordInvalid, ActiveModel::ValidationError
       false
     end
 
