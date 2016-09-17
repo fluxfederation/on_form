@@ -10,8 +10,8 @@ Gem::Specification.new do |spec|
   spec.email         = ["will.bryant@gmail.com"]
 
   spec.summary       = %q{A pragmatism-first library to help Rails applications migrate from complex nested attribute models to tidy form objects.}
-  # spec.description   = %q{TODO: Write a longer description or delete this line.}
-  # spec.homepage      = "TODO: Put your gem's website or public repo URL here."
+  spec.description   = %q{Our goal is that you can migrate large forms to OnForm incrementally, without having to refactor large amounts of code in a single release.}
+  spec.homepage      = "https://github.com/powershop/on_form"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'

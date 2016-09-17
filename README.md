@@ -2,6 +2,16 @@
 
 A pragmatism-first library to help Rails applications migrate from complex nested attribute models to tidy form objects.
 
+Our goal is that you can migrate large forms to OnForm incrementally, without having to refactor large amounts of code in a single release.
+
+Data and validations flow back and forward from the model layer automatically once you've defined which model attributes should be exposed.
+
+Forms backed by multiple models are supported natively, with no concept of a single main model.
+
+ActiveModel/ActiveRecord idioms such as validations and callbacks can be used directly in the form object.
+
+Whereever possible, the terminology and experience should be familiar to Rails developers, to minimize relearning time.
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -22,7 +32,7 @@ Or install it yourself as:
 
 This version of OnForm should work with Rails 5.0 and 4.2.
 
-This version of OnForm depends on both the `activemodel` and `activerecord` gems.  Rails 5.0 has refactored some of the necessary activerecord code across to activemodel, so the activerecord dependency should be dropped once Rails 4.2 support is dropped.
+This version of OnForm depends on both the `activemodel` and `activerecord` gems.  Rails 5.0 has refactored some of the necessary ActiveRecord code across to ActiveModel, so the `activerecord` dependency may be dropped once Rails 4.2 support is dropped.
 
 ### Simple example of wrapping a model
 
