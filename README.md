@@ -122,6 +122,37 @@ But you can also declare validations on the form object itself, which is useful 
 	  end
 	end
 
+### Callbacks
+
+You can also use the `before_validation`, `before_save`, `after_save`, and `around_save` validations.  Like ActiveRecord, these will run inside the database transaction when you're calling one of the save or update methods, which is especially useful if you need to take locks on parent records.
+
+	class NewBranchForm < OnForm::Form
+	  expose :branch => %w(bank_id branch_number branch_name)
+
+	  before_save :lock_bank
+
+	protected
+	  def lock_bank
+	    branch.bank.lock!
+      end
+	end
+
+Note that model save calls are nested inside the form save calls, which means that although form validation takes place before form save starts, model validation takes place after form saving begins.
+
+    form before_validation
+    form validate (validations defined on the form itself)
+    form before_save
+    form around_save begins
+      model before_validation
+      model validate (validations defined on the model)
+      model before_save
+      model around_save begins
+        model saved
+      model around_save ends
+      model after_save
+    form around_save ends
+    form after_save
+
 ### Reusing and extending forms
 
 You can descend form classes from other form classes and expose additional models or additional attributes on existing models.
@@ -167,7 +198,6 @@ If you prefer, you can use the Rails `included` block syntax in the module inste
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/powershop/on_form.
-
 
 ## License
 
