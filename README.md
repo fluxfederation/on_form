@@ -225,6 +225,11 @@ You should then be able to run the test suite:
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/powershop/on_form.
 
+## Roadmap
+
+* For version 2, the author is looking into support for declaring attributes on the form.  (You can use plain old Ruby object `attr_accessor` for untyped attributes in the meantime.)
+* After that we'll need to tackle the other use cases for ActiveRecord nested attributes, such as one-to-many associations and auto-building/deleting associated records.
+
 ## License
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
