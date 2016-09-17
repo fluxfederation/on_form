@@ -17,7 +17,7 @@ Whereever possible, the terminology and experience should be familiar to Rails d
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'on_form'
+gem 'on_form', '~> 1.0'
 ```
 
 And then execute:
