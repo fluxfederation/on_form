@@ -38,44 +38,50 @@ This version of OnForm depends on both the `activemodel` and `activerecord` gems
 
 Let's say you have a big fat legacy model called `Customer`, and you have a preferences controller:
 
-	class PreferencesController
-	  def show
-	    @customer = Customer.find(params[:id])
-	  end
+```ruby
+class PreferencesController
+  def show
+	@customer = Customer.find(params[:id])
+  end
 
-	  def update
-	    @customer = Customer.find(params[:id])
-	    @customer.update!(params[:customer].permit(:name, :email, :phone_number)
-	    redirect_to preferences_path(@customer)
-	  rescue ActiveRecord::RecordInvalid
-	    render :show
-	  end
-	end
+  def update
+	@customer = Customer.find(params[:id])
+	@customer.update!(params[:customer].permit(:name, :email, :phone_number)
+	redirect_to preferences_path(@customer)
+  rescue ActiveRecord::RecordInvalid
+	render :show
+  end
+end
+```
 
 Let's wrap the customer object in a form object.  Ideally we'd call this `@customer_form`, but you may not feel you have time to go and update all your view code, so in this example we'll keep calling it `@customer`.
 
-	class PreferencesController
-	  def show
-	    @customer = PreferencesForm.new(Customer.find(params[:id]))
-	  end
+```ruby
+class PreferencesController
+  def show
+	@customer = PreferencesForm.new(Customer.find(params[:id]))
+  end
 
-	  def update
-	    @customer = PreferencesForm.new(Customer.find(params[:id]))
-	    @customer.update!(params[:customer])
-	  rescue ActiveRecord::RecordInvalid
-	    render :show
-	  end
-	end
+  def update
+	@customer = PreferencesForm.new(Customer.find(params[:id]))
+	@customer.update!(params[:customer])
+  rescue ActiveRecord::RecordInvalid
+	render :show
+  end
+end
+```
 
 Now we need to make our form object.  At this point we need to tell the form object which attributes on the model we want to expose.  (In this example we have just one model and a couple of attributes, but you wouldn't bother using this library if this was all you had.)
 
-	class PreferencesForm < OnForm::Form
-	  expose :customer => %i(name email phone_number)
+```ruby
+class PreferencesForm < OnForm::Form
+  expose :customer => %i(name email phone_number)
 
-	  def initialize(customer)
-	    @customer = customer
-	  end
-	end
+  def initialize(customer)
+	@customer = customer
+  end
+end
+```
 
 The form object responds to the usual persistance methods like `email`, `email=`, `save`, `save!`, `update`, and `update!`.  
 
@@ -87,15 +93,17 @@ You aren't limited to having one primary model - if your form is made up of mult
 
 In this example, the new models we're exposing are associated with the first one, so we don't need to pass them in to the constructor.
 
-	class HouseListingForm < OnForm::Form
-	  expose :house => %i(street_number street_name city),
-	         :vendor => %i(name phone_number)
+```ruby
+class HouseListingForm < OnForm::Form
+  expose :house => %i(street_number street_name city),
+		 :vendor => %i(name phone_number)
 
-	  def initialize(house)
-	    @house = house
-	    @vendor = house.vendor
-	  end
-	end
+  def initialize(house)
+	@house = house
+	@vendor = house.vendor
+  end
+end
+```
 
 Transactions will automatically be started so that _all_ database updates will be rolled back if _any_ record fails to save (for example, due to a validation error).
 
@@ -107,16 +115,18 @@ In the previous example, the constructor set `@house` and `@vendor` because thes
 
 But if you prefer, you can define a method with the same name yourself, for example using delegation.  `expose` won't run `attr_reader` if you've already defined the method, and there's no requirement to set an instance variable.
 
-	class HouseListingForm < OnForm::Form
-	  delegate :vendor, :to => :house
+```ruby
+class HouseListingForm < OnForm::Form
+  delegate :vendor, :to => :house
 
-	  expose :house => %i(street_number street_name city),
-	         :vendor => %i(name phone_number)
+  expose :house => %i(street_number street_name city),
+		 :vendor => %i(name phone_number)
 
-	  def initialize(house)
-	    @house = house
-	  end
-	end
+  def initialize(house)
+	@house = house
+  end
+end
+```
 
 You can also define your own method over the top of the `attr_reader`.  Just remember it will be called more than once, so it should be idempotent.
 
@@ -126,15 +136,17 @@ Validations on the underlying models not only get used, but their validation err
 
 But you can also declare validations on the form object itself, which is useful when you have business rules applicable to this form that aren't intrinsic to the domain model.
 
-	class AddEmergencyContactForm < OnForm::Form
-	  expose :customer => %i(next_of_kin_name next_of_kin_phone_number)
+```ruby
+class AddEmergencyContactForm < OnForm::Form
+  expose :customer => %i(next_of_kin_name next_of_kin_phone_number)
 
-	  validates_presence_of :next_of_kin_name, :next_of_kin_phone_number
+  validates_presence_of :next_of_kin_name, :next_of_kin_phone_number
 
-	  def initialize(customer)
-	    @customer = customer
-	  end
-	end
+  def initialize(customer)
+	@customer = customer
+  end
+end
+```
 
 Note that when you call `save!`, `update!`, or `update_attributes!` on the form object, validation errors from records will still raise `ActiveRecord::RecordInvalid`, but validation errors from validations defined on the form itself will raise `ActiveModel::ValidationError`.  You will usually want to rescue both.
 
@@ -142,16 +154,18 @@ Note that when you call `save!`, `update!`, or `update_attributes!` on the form 
 
 You can also use the `before_validation`, `before_save`, `after_save`, and `around_save` validations.  Like ActiveRecord, these will run inside the database transaction when you're calling one of the save or update methods, which is especially useful if you need to take locks on parent records.
 
-	class NewBranchForm < OnForm::Form
-	  expose :branch => %w(bank_id branch_number branch_name)
+```ruby
+class NewBranchForm < OnForm::Form
+  expose :branch => %w(bank_id branch_number branch_name)
 
-	  before_save :lock_bank
+  before_save :lock_bank
 
-	protected
-	  def lock_bank
-	    branch.bank.lock!
-      end
-	end
+protected
+  def lock_bank
+	branch.bank.lock!
+  end
+end
+```
 
 Note that model save calls are nested inside the form save calls, which means that although form validation takes place before form save starts, model validation takes place after form saving begins.
 
@@ -173,39 +187,43 @@ Note that model save calls are nested inside the form save calls, which means th
 
 You can descend form classes from other form classes and expose additional models or additional attributes on existing models.
 
-	class AdminHouseListingForm < HouseListingForm
-	  expose :house => %i(listing_approved)
-	end
+```ruby
+class AdminHouseListingForm < HouseListingForm
+  expose :house => %i(listing_approved)
+end
+```
 
 This works well for some use cases, but can quickly become cumbersome if you have a lot of partial form reuse, and it may not be obvious to other developers that the parent form is also used to derive the other forms.  Consider breaking your form parts into reuseable modules, and defining each form separately.
 
 You can use standard Ruby hooks for this:
 
-	module AccountFormComponent
-	  def self.included(form)
-	    form.expose :customer => %i(email phone_number)
-	  end
-	end
+```ruby
+module AccountFormComponent
+  def self.included(form)
+	form.expose :customer => %i(email phone_number)
+  end
+end
 
-	class NewAccountForm < OnForm::Form
-	  include AccountFormComponent
+class NewAccountForm < OnForm::Form
+  include AccountFormComponent
 
-	  expose :customer => %i(name)
+  expose :customer => %i(name)
 
-	  def initialize(customer)
-	    @customer = customer
-	  end
-	end
+  def initialize(customer)
+	@customer = customer
+  end
+end
 
-	class EditAccountForm < OnForm::Form
-	  include AccountFormComponent
+class EditAccountForm < OnForm::Form
+  include AccountFormComponent
 
-	  delegate :name, to: :customer
+  delegate :name, to: :customer
 
-	  def initialize(customer)
-	    @customer = customer
-	  end
-	end
+  def initialize(customer)
+	@customer = customer
+  end
+end
+```
 
 In this example the initialize method could actually be moved to the module as well, but that makes it harder to compose forms from multiple modules.
 
