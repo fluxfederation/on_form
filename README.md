@@ -41,15 +41,15 @@ Let's say you have a big fat legacy model called `Customer`, and you have a pref
 ```ruby
 class PreferencesController
   def show
-	@customer = Customer.find(params[:id])
+    @customer = Customer.find(params[:id])
   end
 
   def update
-	@customer = Customer.find(params[:id])
-	@customer.update!(params[:customer].permit(:name, :email, :phone_number)
-	redirect_to preferences_path(@customer)
+    @customer = Customer.find(params[:id])
+    @customer.update!(params[:customer].permit(:name, :email, :phone_number)
+    redirect_to preferences_path(@customer)
   rescue ActiveRecord::RecordInvalid
-	render :show
+    render :show
   end
 end
 ```
@@ -59,14 +59,14 @@ Let's wrap the customer object in a form object.  Ideally we'd call this `@custo
 ```ruby
 class PreferencesController
   def show
-	@customer = PreferencesForm.new(Customer.find(params[:id]))
+    @customer = PreferencesForm.new(Customer.find(params[:id]))
   end
 
   def update
-	@customer = PreferencesForm.new(Customer.find(params[:id]))
-	@customer.update!(params[:customer])
+    @customer = PreferencesForm.new(Customer.find(params[:id]))
+    @customer.update!(params[:customer])
   rescue ActiveRecord::RecordInvalid
-	render :show
+    render :show
   end
 end
 ```
@@ -78,7 +78,7 @@ class PreferencesForm < OnForm::Form
   expose :customer => %i(name email phone_number)
 
   def initialize(customer)
-	@customer = customer
+    @customer = customer
   end
 end
 ```
@@ -96,11 +96,11 @@ In this example, the new models we're exposing are associated with the first one
 ```ruby
 class HouseListingForm < OnForm::Form
   expose :house => %i(street_number street_name city),
-		 :vendor => %i(name phone_number)
+         :vendor => %i(name phone_number)
 
   def initialize(house)
-	@house = house
-	@vendor = house.vendor
+    @house = house
+    @vendor = house.vendor
   end
 end
 ```
@@ -120,10 +120,10 @@ class HouseListingForm < OnForm::Form
   delegate :vendor, :to => :house
 
   expose :house => %i(street_number street_name city),
-		 :vendor => %i(name phone_number)
+         :vendor => %i(name phone_number)
 
   def initialize(house)
-	@house = house
+    @house = house
   end
 end
 ```
@@ -143,7 +143,7 @@ class AddEmergencyContactForm < OnForm::Form
   validates_presence_of :next_of_kin_name, :next_of_kin_phone_number
 
   def initialize(customer)
-	@customer = customer
+    @customer = customer
   end
 end
 ```
@@ -162,7 +162,7 @@ class NewBranchForm < OnForm::Form
 
 protected
   def lock_bank
-	branch.bank.lock!
+    branch.bank.lock!
   end
 end
 ```
@@ -200,7 +200,7 @@ You can use standard Ruby hooks for this:
 ```ruby
 module AccountFormComponent
   def self.included(form)
-	form.expose :customer => %i(email phone_number)
+    form.expose :customer => %i(email phone_number)
   end
 end
 
@@ -210,7 +210,7 @@ class NewAccountForm < OnForm::Form
   expose :customer => %i(name)
 
   def initialize(customer)
-	@customer = customer
+    @customer = customer
   end
 end
 
@@ -220,7 +220,7 @@ class EditAccountForm < OnForm::Form
   delegate :name, to: :customer
 
   def initialize(customer)
-	@customer = customer
+    @customer = customer
   end
 end
 ```
@@ -233,11 +233,11 @@ If you prefer, you can use the Rails `included` block syntax in the module inste
 
 After checking out the repo, pick the rails version you'd like to run tests against, and run:
 
-	RAILS_VERSION=5.0.0.1 bundle update
+    RAILS_VERSION=5.0.0.1 bundle update
 
 You should then be able to run the test suite:
 
-	bundle exec rake
+    bundle exec rake
 
 ## Contributing
 
