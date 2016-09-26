@@ -130,6 +130,28 @@ end
 
 You can also define your own method over the top of the `attr_reader`.  Just remember it will be called more than once, so it must be idempotent.
 
+### Renaming attributes
+
+By default the attribute names exposed on the form object are the same as the attributes on the backing models.  Sometimes this leads to unclear meanings, and sometimes you'll have duplicate attribute names in a multi-model form.
+
+To address this you can use the `prefix` and/or `suffix` options to `expose`.
+
+```ruby
+class AccountHolderForm < OnForm::Form
+  expose %i(name date_of_birth), on: :customer, prefix: "account_holder_"
+  expose %i(email), on: :customer, suffix: "_for_billing"
+  expose %i(phone_number), on: :customer, as: "mobile_number"
+
+  def initialize(customer)
+    @customer = customer
+  end
+end
+```
+
+This is especially useful if you like to use helpers like `error_messages_on` which will "humanize" the attribute names and use them in the human-readable page.
+
+Try to use this only when it makes the attribute names more meaningful.  In particular, automatically renaming all of your attributes with a prefix matching the backing model is considered a bad habit because it leads to unnecessary coupling between the views and the current backing data model schema.
+
 ### Validations
 
 Validations on the underlying models not only get used, but their validation errors show up on the form's `errors` object directly when you call `valid?` or any of the save/update methods.

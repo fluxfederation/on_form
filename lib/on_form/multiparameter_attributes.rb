@@ -22,7 +22,7 @@ module OnForm
           if defined?(ActiveRecord::AttributeAssignment::MultiparameterAttribute)
             # ActiveRecord 4.2 and below: you must use MultiparameterAttribute to construct the attribute value.
             # we therefore have to look up which model the attribute actually lives on.
-            send("#{name}=", ActiveRecord::AttributeAssignment::MultiparameterAttribute.new(backing_object_for_attribute(name), name, values_with_empty_parameters).read_value)
+            send("#{name}=", ActiveRecord::AttributeAssignment::MultiparameterAttribute.new(backing_model_for_attribute(name), name, values_with_empty_parameters).read_value)
           else
             # ActiveRecord 5.0+: you can assign the indexed hash to the column and it will construct the value for you.
             if values_with_empty_parameters.each_value.all?(&:nil?)

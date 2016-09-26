@@ -10,7 +10,7 @@ end
 
 class ChildForm < ParentForm
   expose %i(email), on: :customer
-  expose %i(dummyattr), on: :dummy
+  expose %i(someattr), on: :dummy, prefix: 'dummy_'
 end
 
 class CustomerHouseListingForm < OnForm::Form
@@ -30,13 +30,13 @@ end
 describe "form inheritance" do
   it "exposes parent attributes and new attributes in the child" do
     ChildForm.exposed_attributes.keys.must_equal %i(customer dummy)
-    ChildForm.exposed_attributes[:customer].sort.must_equal %i(name phone_number email).sort
-    ChildForm.exposed_attributes[:dummy].sort.must_equal %i(dummyattr)
+    ChildForm.exposed_attributes[:customer].must_equal(:name => :name, :phone_number => :phone_number, :email => :email)
+    ChildForm.exposed_attributes[:dummy].must_equal(:dummy_someattr => :someattr)
   end
 
   it "doesn't exposes new child attributes in the parent" do
     ParentForm.exposed_attributes.keys.must_equal %i(customer)
-    ParentForm.exposed_attributes[:customer].sort.must_equal %i(name phone_number).sort
+    ParentForm.exposed_attributes[:customer].must_equal(:name => :name, :phone_number => :phone_number)
   end
 
   it "saves attributes exposed in both parent and child forms" do

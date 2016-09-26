@@ -5,7 +5,7 @@ module OnForm
     end
 
     def transaction(&block)
-      with_transactions(backing_models, &block)
+      with_transactions(backing_model_instances, &block)
     end
 
     def invalid?
@@ -21,7 +21,7 @@ module OnForm
         end
         run_callbacks :save do
           begin
-            backing_models.each { |backing_model| backing_model.save! }
+            backing_model_instances.each { |backing_model| backing_model.save! }
           rescue ActiveRecord::RecordInvalid, ActiveModel::ValidationError
             collect_errors
             raise
@@ -72,7 +72,7 @@ module OnForm
     end
 
     def run_backing_model_validations
-      backing_models.collect { |backing_model| backing_model.valid? }
+      backing_model_instances.collect { |backing_model| backing_model.valid? }
       collect_errors
     end
   end

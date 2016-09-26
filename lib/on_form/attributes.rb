@@ -20,7 +20,7 @@ module OnForm
     end
 
     def attribute_names
-      self.class.exposed_attributes.values.reduce(:+).collect(&:to_s)
+      self.class.exposed_attributes.values.flat_map(&:keys).collect(&:to_s)
     end
 
     def attributes
@@ -46,17 +46,17 @@ module OnForm
     end
 
   private
-    def backing_model(backing_model_name)
+    def backing_model_instance(backing_model_name)
       send(backing_model_name)
     end
 
-    def backing_models
-      self.class.exposed_attributes.keys.collect { |backing_model_name| backing_model(backing_model_name) }
+    def backing_model_instances
+      self.class.exposed_attributes.keys.collect { |backing_model_name| backing_model_instance(backing_model_name) }
     end
 
-    def backing_object_for_attribute(attribute_name)
-      self.class.exposed_attributes.each do |backing_model_name, attribute_names|
-        return backing_model(backing_model_name) if attribute_names.include?(attribute_name.to_sym)
+    def backing_model_for_attribute(exposed_name)
+      self.class.exposed_attributes.each do |backing_model_name, attribute_mappings|
+        return backing_model_instance(backing_model_name) if attribute_mappings[exposed_name.to_sym]
       end
       nil
     end

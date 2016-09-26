@@ -10,13 +10,19 @@ module OnForm
     end
 
     def collect_errors
-      self.class.exposed_attributes.each do |backing_model_name, exposed_attributes_on_backing_model|
-        backing_model(backing_model_name).errors.each do |backing_attribute, attribute_errors|
-          if backing_attribute == :base || exposed_attributes_on_backing_model.include?(backing_attribute)
-            Array(attribute_errors).each { |error| errors[backing_attribute] << error }
-          end
+      self.class.exposed_attributes.each do |backing_model_name, attribute_mappings|
+        backing_model = backing_model_instance(backing_model_name)
+
+        collect_errors_on(backing_model, :base, :base)
+
+        attribute_mappings.each do |exposed_name, backing_name|
+          collect_errors_on(backing_model, exposed_name, backing_name)
         end
       end
+    end
+
+    def collect_errors_on(backing_model, exposed_name, backing_name)
+      Array(backing_model.errors[backing_name]).each { |error| errors[exposed_name] << error }
     end
   end
 end
