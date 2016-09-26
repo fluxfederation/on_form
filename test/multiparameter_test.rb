@@ -1,7 +1,7 @@
 require "test_helper"
 
 class PersonalDetailsForm < OnForm::Form
-  expose :customer => %i(name date_of_birth married_at)
+  expose %i(name date_of_birth married_at), on: :customer
 
   def initialize(customer)
     @customer = customer

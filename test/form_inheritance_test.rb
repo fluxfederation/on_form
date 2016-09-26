@@ -1,7 +1,7 @@
 require "test_helper"
 
 class ParentForm < OnForm::Form
-  expose :customer => %i(name phone_number)
+  expose %i(name phone_number), on: :customer
 
   def initialize(customer)
     @customer = customer
@@ -9,13 +9,13 @@ class ParentForm < OnForm::Form
 end
 
 class ChildForm < ParentForm
-  expose :customer => %i(email)
-  expose :dummy => %i(dummyattr)
+  expose %i(email), on: :customer
+  expose %i(dummyattr), on: :dummy
 end
 
 class CustomerHouseListingForm < OnForm::Form
-  expose :house => %i(street_number street_name city),
-         :vendor => %i(name phone_number)
+  expose %i(street_number street_name city), on: :house
+  expose %i(name phone_number), on: :vendor
 
   def initialize(house)
     @house = house
@@ -24,7 +24,7 @@ class CustomerHouseListingForm < OnForm::Form
 end
 
 class AdminHouseListingForm < CustomerHouseListingForm
-  expose :house => %i(listing_approved)
+  expose %i(listing_approved), on: :house
 end
 
 describe "form inheritance" do

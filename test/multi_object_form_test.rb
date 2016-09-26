@@ -1,8 +1,8 @@
 require "test_helper"
 
 class HouseListingForm < OnForm::Form
-  expose :house => %i(street_number street_name city),
-         :vendor => %i(name phone_number)
+  expose %i(street_number street_name city), on: :house
+  expose %i(name phone_number), on: :vendor
 
   def initialize(house)
     @house = house
@@ -13,8 +13,8 @@ end
 class DelegatedHouseListingForm < OnForm::Form
   delegate :vendor, :to => :house
 
-  expose :house => %i(street_number street_name city),
-         :vendor => %i(name phone_number)
+  expose %i(street_number street_name city), on: :house
+  expose %i(name phone_number), on: :vendor
 
   def initialize(house)
     @house = house

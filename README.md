@@ -75,7 +75,7 @@ Now we need to make our form object.  At this point we need to tell the form obj
 
 ```ruby
 class PreferencesForm < OnForm::Form
-  expose :customer => %i(name email phone_number)
+  expose %i(name email phone_number), on: :customer
 
   def initialize(customer)
     @customer = customer
@@ -85,18 +85,18 @@ end
 
 The form object responds to the usual persistance methods like `email`, `email=`, `save`, `save!`, `update`, and `update!`.  
 
-It will automatically write those exposed attributes back onto the models, and *it exposes any validation errors from those fields on the form object itself* - you don't have to copy them back manually or move your field validation code over to get started.  It'll also expose any errors on base on the models whose attributes you exposed.
+It will automatically write those exposed attributes back onto the models, and *it exposes any validation errors from those fields on the form object itself* - you don't have to copy them back manually or move your field validation code over to get started.  It'll also expose any errors on base on the models whose attributes you exposed.  See the Validations section below for more.
 
 ### A multi-model form
 
-You aren't limited to having one primary model - if your form is made up of multiple models pass more than one key to `expose`, or call it multiple times if you prefer.  They'll automatically be saved in the same order you declared them.
+You aren't limited to having one primary model - if your form is backed by multiple models just call `expose` for each one.  They'll automatically be saved in the same order you declared them.
 
 In this example, the new models we're exposing are associated with the first one, so we don't need to pass them in to the constructor.
 
 ```ruby
 class HouseListingForm < OnForm::Form
-  expose :house => %i(street_number street_name city),
-         :vendor => %i(name phone_number)
+  expose %i(street_number street_name city), on: :house
+  expose %i(name phone_number), on: :vendor
 
   def initialize(house)
     @house = house
@@ -107,11 +107,11 @@ end
 
 Transactions will automatically be started so that _all_ database updates will be rolled back if _any_ record fails to save (for example, due to a validation error).
 
-Note that the keys are the name of the methods on the form object which return the records, not the class names.  In this example, vendor might actually be an instance of our `Customer` model from the earlier examples.
+Note that the `on:` kwarg gives the name of the method on the form object which returns the record - nothing to do with class names.  In this example, vendor might actually be an instance of our `Customer` model from the earlier examples.
 
 ### Model accessor methods
 
-In the previous example, the constructor set `@house` and `@vendor` because these variables correspond to the names passed to `expose`.  `expose` will automatically add an `attr_reader` for each key it's given, meaning you only need to set the instance variables.
+In the previous example, the constructor set `@house` and `@vendor` because these variables correspond to the name passed to `expose` in the `on` option.  `expose` will automatically add an `attr_reader` for this name, meaning you only need to set the instance variables.
 
 But if you prefer, you can define a method with the same name yourself, for example using delegation.  `expose` won't run `attr_reader` if you've already defined the method, and there's no requirement to set an instance variable.
 
@@ -119,8 +119,8 @@ But if you prefer, you can define a method with the same name yourself, for exam
 class HouseListingForm < OnForm::Form
   delegate :vendor, :to => :house
 
-  expose :house => %i(street_number street_name city),
-         :vendor => %i(name phone_number)
+  expose %i(street_number street_name city), on: :house
+  expose %i(name phone_number), on: :vendor
 
   def initialize(house)
     @house = house
@@ -128,7 +128,7 @@ class HouseListingForm < OnForm::Form
 end
 ```
 
-You can also define your own method over the top of the `attr_reader`.  Just remember it will be called more than once, so it should be idempotent.
+You can also define your own method over the top of the `attr_reader`.  Just remember it will be called more than once, so it must be idempotent.
 
 ### Validations
 
@@ -138,7 +138,7 @@ But you can also declare validations on the form object itself, which is useful 
 
 ```ruby
 class AddEmergencyContactForm < OnForm::Form
-  expose :customer => %i(next_of_kin_name next_of_kin_phone_number)
+  expose %i(next_of_kin_name next_of_kin_phone_number), on: :customer
 
   validates_presence_of :next_of_kin_name, :next_of_kin_phone_number
 
@@ -156,7 +156,7 @@ You can also use the `before_validation`, `before_save`, `after_save`, and `arou
 
 ```ruby
 class NewBranchForm < OnForm::Form
-  expose :branch => %w(bank_id branch_number branch_name)
+  expose %w(bank_id branch_number branch_name), on: :branch
 
   before_save :lock_bank
 
@@ -189,7 +189,7 @@ You can descend form classes from other form classes and expose additional model
 
 ```ruby
 class AdminHouseListingForm < HouseListingForm
-  expose :house => %i(listing_approved)
+  expose %i(listing_approved), on: :house
 end
 ```
 
@@ -200,14 +200,14 @@ You can use standard Ruby hooks for this:
 ```ruby
 module AccountFormComponent
   def self.included(form)
-    form.expose :customer => %i(email phone_number)
+    form.expose %i(email phone_number), on: :customer
   end
 end
 
 class NewAccountForm < OnForm::Form
   include AccountFormComponent
 
-  expose :customer => %i(name)
+  expose %i(name), on: :customer
 
   def initialize(customer)
     @customer = customer

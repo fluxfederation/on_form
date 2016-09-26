@@ -2,14 +2,14 @@ require "test_helper"
 
 module AccountFormComponent
   def self.included(form)
-    form.expose :customer => %i(email phone_number)
+    form.expose %i(email phone_number), on: :customer
   end
 end
 
 class NewAccountForm < OnForm::Form
   include AccountFormComponent
 
-  expose :customer => %i(name)
+  expose %i(name), on: :customer
 
   def initialize(customer)
     @customer = customer
