@@ -28,6 +28,7 @@ describe "a basic single-model form" do
   it "sets exposed attribute values from attribute writer methods" do
     @preferences_form.name = "New Name"
     @customer.name.must_equal "New Name"
+    @customer.name_was.must_equal "Test User"
   end
 
   it "lists attribute names" do

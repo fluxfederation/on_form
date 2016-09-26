@@ -40,6 +40,7 @@ module OnForm
       define_method(exposed_name)                       { backing_model_instance(backing_model_name).send(backing_name) }
       define_method("#{exposed_name}_before_type_cast") { backing_model_instance(backing_model_name).send("#{backing_name}_before_type_cast") }
       define_method("#{exposed_name}?")                 { backing_model_instance(backing_model_name).send("#{backing_name}?") }
+      define_method("#{exposed_name}_was")              { backing_model_instance(backing_model_name).send("#{backing_name}_was") }
       define_method("#{exposed_name}=")                 { |arg| backing_model_instance(backing_model_name).send("#{backing_name}=", arg) }
     end
   end
