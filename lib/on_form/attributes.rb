@@ -20,7 +20,8 @@ module OnForm
     end
 
     def attribute_names
-      self.class.exposed_attributes.values.flat_map(&:keys).collect(&:to_s)
+      self.class.exposed_attributes.values.flat_map(&:keys).collect(&:to_s) +
+        self.class.introduced_attribute_types.keys.collect(&:to_s)
     end
 
     def attributes

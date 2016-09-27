@@ -134,7 +134,7 @@ You can also define your own method over the top of the `attr_reader`.  Just rem
 
 By default the attribute names exposed on the form object are the same as the attributes on the backing models.  Sometimes this leads to unclear meanings, and sometimes you'll have duplicate attribute names in a multi-model form.
 
-To address this you can use the `prefix` and/or `suffix` options to `expose`.
+To address this you can use the `prefix` and/or `suffix` options to `expose`, or if you need to change the name completely, the `as` option.
 
 ```ruby
 class AccountHolderForm < OnForm::Form
@@ -204,6 +204,65 @@ Note that model save calls are nested inside the form save calls, which means th
       model after_save
     form around_save ends
     form after_save
+
+### Adding artifical attributes
+
+In addition to mapping attributes between models and the form, you can introduce new attributes which are not directly persisted anywhere.  You can use any of the "standard" (non-database-specific) ActiveRecord types, and you can add `default`, `scale`, and `precision` options.
+
+```ruby
+class ChangeEmailForm < OnForm::Form
+  expose %i(email), on: :customer, as: :new_email
+  attribute :email_confirmation, :string, :default => "(please confirm)"
+
+  validate :email_confirmation_matches
+
+  def initialize(customer)
+    @customer = customer
+  end
+
+  def email_confirmation_matches
+    errors[:email_confirmation] << "does not match" unless email_confirmation == new_email
+  end
+end
+```
+
+### Model-less forms
+
+Taking this one step further, you can define forms which have _no_ exposed model attributes.  *Be aware that forms that expose no models do not automatically start a database transaction, because they don't know which database connection to use.*
+
+To actually perform a data change in response to the form submission, you can add a `before_save` or `after_save` callback and from there call your existing model code or service objects.  It's best to keep the code in the form object to just the bits specific to the form - try not to put your business logic in your form objects!
+
+```ruby
+class ChangePasswordForm < OnForm::Form
+  attribute :current_password, :string
+  attribute :password, :string
+  attribute :password_confirmation, :string
+
+  validate :current_password_correct
+  validate :password_confirmation_matches
+  before_save :set_new_password
+
+  def initialize(customer)
+    @customer = customer
+  end
+
+  def current_password_correct
+    unless @customer.password_correct?(current_password)
+      errors[:current_password] << "is incorrect"
+    end
+  end
+
+  def password_confirmation_matches
+    unless password_confirmation == password
+      errors[:password_confirmation] << "doesn't match"
+    end
+  end
+
+  def set_new_password
+    @customer.change_password!(password)
+  end
+end
+```
 
 ### Reusing and extending forms
 
