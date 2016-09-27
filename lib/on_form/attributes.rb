@@ -54,9 +54,11 @@ module OnForm
       self.class.exposed_attributes.keys.collect { |backing_model_name| backing_model_instance(backing_model_name) }
     end
 
-    def backing_model_for_attribute(exposed_name)
+    def backing_for_attribute(exposed_name)
       self.class.exposed_attributes.each do |backing_model_name, attribute_mappings|
-        return backing_model_instance(backing_model_name) if attribute_mappings[exposed_name.to_sym]
+        if backing_name = attribute_mappings[exposed_name.to_sym]
+          return [backing_model_instance(backing_model_name), backing_name]
+        end
       end
       nil
     end

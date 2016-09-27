@@ -1,6 +1,7 @@
-# unlike the rest of this library, which is new code, the code in this source file is from ActiveRecord, and
-# is used to provide compatibility wrappers with different versions of ActiveRecord.  please keep it separate
-# so we can see where everything came from and what may need to be kept in sync with ActiveRecord refactors.
+# unlike the rest of this library, which is new code, the code in this source file is from Rails, and is used to
+# provide compatibility wrappers with different versions of ActiveRecord/ActiveModel.  please keep it separate so
+# we can see where everything came from, and what may need to be kept in sync with refactors in those libraries.
+
 module OnForm
   module MultiparameterAttributes
     # Instantiates objects for all attribute classes that needs more than one constructor parameter. This is done
@@ -22,7 +23,8 @@ module OnForm
           if defined?(ActiveRecord::AttributeAssignment::MultiparameterAttribute)
             # ActiveRecord 4.2 and below: you must use MultiparameterAttribute to construct the attribute value.
             # we therefore have to look up which model the attribute actually lives on.
-            send("#{name}=", ActiveRecord::AttributeAssignment::MultiparameterAttribute.new(backing_model_for_attribute(name), name, values_with_empty_parameters).read_value)
+            backing_model, backing_name = backing_for_attribute(name)
+            send("#{name}=", ActiveRecord::AttributeAssignment::MultiparameterAttribute.new(backing_model, backing_name.to_s, values_with_empty_parameters).read_value)
           else
             # ActiveRecord 5.0+: you can assign the indexed hash to the column and it will construct the value for you.
             if values_with_empty_parameters.each_value.all?(&:nil?)
@@ -62,6 +64,23 @@ module OnForm
 
     def find_parameter_position(multiparameter_name)
       multiparameter_name.scan(/\(([0-9]*).*\)/).first.first.to_i
+    end
+  end
+end
+
+
+require 'active_model/validations'
+
+unless ActiveModel.const_defined?(:ValidationError)
+  module ActiveModel
+    class ValidationError < StandardError
+      attr_reader :model
+
+      def initialize(model)
+        @model = model
+        errors = @model.errors.full_messages.join(", ")
+        super(I18n.t(:"#{@model.class.i18n_scope}.errors.messages.model_invalid", errors: errors, default: :"errors.messages.model_invalid"))
+      end
     end
   end
 end
