@@ -90,7 +90,7 @@ describe "callbacks" do
   it "stops before saving if the form validations fail" do
     @save_callback_form.fail_validation = true
     @logs.must_equal []
-    proc { @save_callback_form.save! }.must_raise ActiveModel::ValidationError
+    proc { @save_callback_form.save! }.must_raise(ActiveModel::ValidationError).message.must_equal "Validation failed: failing validation"
     @save_callback_form.errors[:base].must_equal ["failing validation"]
     @logs.must_equal [
       "SaveCallbackForm before_validation",
