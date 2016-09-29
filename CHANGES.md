@@ -1,6 +1,10 @@
 Changelog
 =========
 
+2.2.1
+-----
+* Fill in the validation error message for Rails 4.2.
+
 2.2.0
 -----
 * Remove the previously existing transaction caveat around model-less saves.
