@@ -24,6 +24,7 @@ module OnForm
     end
 
     def self.expose(backing_attribute_names, on:, prefix: nil, suffix: nil, as: nil)
+      backing_attribute_names = Array(backing_attribute_names)
       raise ArgumentError, "can't expose multiple attributes as the same form attribute!" if as && backing_attribute_names.size != 1
       on = on.to_sym
       expose_backing_model(on)

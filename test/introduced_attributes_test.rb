@@ -1,7 +1,7 @@
 require "test_helper"
 
 class ChangeEmailForm < OnForm::Form
-  expose %i(email), on: :customer, as: :new_email
+  expose :email, on: :customer, as: :new_email
   attribute :email_confirmation, :string, :default => "(please confirm)"
 
   validate :email_confirmation_matches
