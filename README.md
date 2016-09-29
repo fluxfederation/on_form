@@ -228,7 +228,7 @@ end
 
 ### Model-less forms
 
-Taking this one step further, you can define forms which have _no_ exposed model attributes.  *Be aware that forms that expose no models do not automatically start a database transaction, because they don't know which database connection to use.*
+Taking this one step further, you can define forms which have _no_ exposed model attributes.
 
 To actually perform a data change in response to the form submission, you can add a `before_save` or `after_save` callback and from there call your existing model code or service objects.  It's best to keep the code in the form object to just the bits specific to the form - try not to put your business logic in your form objects!
 
@@ -263,6 +263,8 @@ class ChangePasswordForm < OnForm::Form
   end
 end
 ```
+
+Note that when you have no exposed models, OnForm will still wrap the save process in a database transaction for you, using `ActiveRecord::Base.transaction`.  If you have multiple database connections, you may need to start transactions on the other connections yourself.
 
 ### Reusing and extending forms
 

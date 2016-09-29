@@ -64,4 +64,17 @@ describe "model-less forms" do
     @change_password_form.update!(current_password: "oldpassword", password: "newpassword", password_confirmation: "newpassword")
     @customer.reload.password_digest.must_equal dummy_password_hash("newpassword")
   end
+
+  it "rolls back the database transaction if the update fails" do
+    @customer.save!
+    update_and_raise_error_proc = -> (update_params) {
+      @customer.password_digest = "dummy value that should get rolled back"
+      @customer.save!
+      raise IOError, "test error"
+    }
+    @customer.stub(:update!, update_and_raise_error_proc) do
+      proc { @change_password_form.update!(current_password: "oldpassword", password: "newpassword", password_confirmation: "newpassword") }.must_raise(IOError)
+    end
+    @customer.reload.password_digest.must_equal dummy_password_hash("oldpassword")
+  end
 end

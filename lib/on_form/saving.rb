@@ -5,7 +5,13 @@ module OnForm
     end
 
     def transaction(&block)
-      with_transactions(backing_model_instances, &block)
+      backing_models = backing_model_instances
+
+      if backing_models.empty?
+        with_transactions([ActiveRecord::Base], &block)
+      else
+        with_transactions(backing_model_instances, &block)
+      end
     end
 
     def invalid?
