@@ -16,6 +16,10 @@ module OnForm
       @introduced_attribute_types ||= {}
     end
 
+    def self.identity_model_name
+      @identity_model_name
+    end
+
     class << self
       def inherited(child)
         exposed_attributes.each { |k, v| child.exposed_attributes[k].merge!(v) }
@@ -23,11 +27,14 @@ module OnForm
       end
     end
 
-    def self.expose(backing_attribute_names, on:, prefix: nil, suffix: nil, as: nil)
+    def self.expose(backing_attribute_names, on: nil, prefix: nil, suffix: nil, as: nil)
       backing_attribute_names = Array(backing_attribute_names)
       raise ArgumentError, "can't expose multiple attributes as the same form attribute!" if as && backing_attribute_names.size != 1
-      on = on.to_sym
+
+      raise ArgumentError, "must choose the model to expose the attributes on" unless on || identity_model_name
+      on = (on || identity_model_name).to_sym
       expose_backing_model(on)
+
       backing_attribute_names.each do |backing_name|
         exposed_name = as || "#{prefix}#{backing_name}#{suffix}"
         expose_attribute(on, exposed_name, backing_name)
@@ -59,6 +66,12 @@ module OnForm
       define_method("#{name}_changed?")         { send(name) != send("#{name}_was") }
       define_method("#{name}_was")              { type = self.class.introduced_attribute_types[name]; type.cast(type.default) }
       define_method("#{name}=")                 { |arg| introduced_attribute_values.delete(name); introduced_attribute_values_before_type_cast[name] = arg }
+    end
+
+    def self.take_identity_from(backing_model_name)
+      @identity_model_name = backing_model_name.to_sym
+      expose_backing_model(@identity_model_name)
+      delegate :to_model, :to_key, :to_param, :persisted?, to: backing_model_name
     end
 
   protected

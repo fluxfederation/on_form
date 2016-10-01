@@ -71,7 +71,7 @@ class PreferencesController
 end
 ```
 
-Now we need to make our form object.  At this point we need to tell the form object which attributes on the model we want to expose.  (In this example we have just one model and a couple of attributes, but you wouldn't bother using this library if this was all you had.)
+Now we need to make our form object.  At this point we need to tell the form object which attributes on the model we want to `expose`.  (In this example we have just one model and a couple of attributes, but you wouldn't bother using this library if this was all you had.)
 
 ```ruby
 class PreferencesForm < OnForm::Form
@@ -129,6 +129,76 @@ end
 ```
 
 You can also define your own method over the top of the `attr_reader`.  Just remember it will be called more than once, so it must be idempotent.
+
+### View helpers & acting like ActiveModel/ActiveRecord
+
+Since OnForm doesn't require a single "main" model, forms don't automatically have any particular identity value (ie. an `id` attribute or a value to return from `to_param`).
+
+So although by default forms will work fine with all the 'raw' form field helpers and with helpers like `fields_for`, they're not automatically usable with the resource form methods like `form_for`, which assumes you have a one-to-one correspondance between your models and your views (in other words, that you have no form object layer).
+
+You have several options.  First, you can start your form tags completely manually, optionally choosing the name for the params:
+
+```erb
+<%= form_tag customer_path(edit_details_form.customer), method: :put do %>
+  <%# if the controller has set an ivar called @edit_details_form %>
+  <%= fields_for :edit_details_form do |f| %>
+    <%# produces a field called edit_details_form[name] %>
+    <%= f.text_field :name %>
+  <% end %>
+
+  <%# or you can give it a different name, to control what the form params will be named %>
+  <%= fields_for :customer, @edit_details_form do |f| %>
+    <%# produces a field called customer[name], which is what a normal resource controller expects %>
+    <%= f.text_field :name %>
+  <% end %>
+<% end %>
+```
+
+Secondly, you can combine these calls into a `form_for` call using some of its optional arguments:
+
+```erb
+<%= form_for @edit_details_form, as: :customer, url: customer_path(edit_details_form.customer), method: :put do |f| %>
+  <%# produces a field called customer[name] %>
+  <%= f.text_field :name %>
+<% end %>
+```
+
+Thirdly, you can delegate the identity question to one of the models that backs the form using `takes_identity_from`.  When you do this, the form objects start to return that model from `to_model` and the `to_key` and `to_param` values of that model as their own.  This is the recommended approach when dealing with standard resource ('RESTful') controllers.
+
+```ruby
+class EditPostForm < OnForm::Form
+  take_identity_from :post
+
+  expose %i(title body), on: :post
+
+  def initialize(post)
+    @post = post
+  end
+end
+```
+
+```erb
+<%= form_for @edit_details_form do |f| %>
+  <%# produces a field called customer[name] %>
+  <%= f.text_field :name %>
+<% end %>
+```
+
+Note that we no longer have to specify the `as` ,`url`, or `method` options, because these will be automatically derived from the `customer` model instead of from the form object itself.
+
+When you choose an identity model, it will also become the default model for `expose` calls, which helps DRY up single-model form objects.
+
+```ruby
+class EditPostForm < OnForm::Form
+  take_identity_from :post
+
+  expose %i(title body)
+
+  def initialize(post)
+    @post = post
+  end
+end
+```
 
 ### Renaming attributes
 
