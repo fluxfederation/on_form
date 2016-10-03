@@ -32,7 +32,9 @@ module OnForm
 
     def attributes=(attributes)
       # match ActiveRecord #attributes= behavior on nil, scalars, etc.
-      raise ArgumentError, "When assigning attributes, you must pass a hash as an argument." unless attributes.is_a?(Hash)
+      if !attributes.respond_to?(:stringify_keys)
+        raise ArgumentError, "When assigning attributes, you must pass a hash as an argument."
+      end
 
       multiparameter_attributes = {}
       attributes.each do |attribute_name, attribute_value|
