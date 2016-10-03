@@ -1,6 +1,11 @@
 Changelog
 =========
 
+2.2.2
+-----
+* Support non-array argument to `expose`.
+* Fix compatibility with `ActionController::Parameters`.
+
 2.2.1
 -----
 * Fill in the validation error message for Rails 4.2.
