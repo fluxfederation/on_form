@@ -1,6 +1,10 @@
 Changelog
 =========
 
+2.3.0
+-----
+* Add `take_identity_from` to improve interoperability with standard resource ('RESTful') controllers and form helpers
+
 2.2.2
 -----
 * Support non-array argument to `expose`.
