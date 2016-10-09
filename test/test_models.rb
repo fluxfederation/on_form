@@ -8,6 +8,14 @@ class Customer < ActiveRecord::Base
 end
 
 class House < ActiveRecord::Base
-  validates_presence_of :vendor, :street_number, :street_name, :city
   belongs_to :vendor, :class_name => 'Customer'
+  has_many   :house_rooms, :inverse_of => :house
+
+  validates_presence_of :vendor, :street_number, :street_name, :city
+end
+
+class HouseRoom < ActiveRecord::Base
+  belongs_to :house
+
+  validates_presence_of :house, :name, :area
 end

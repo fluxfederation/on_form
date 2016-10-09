@@ -21,4 +21,11 @@ ActiveRecord::Schema.define(:version => 0) do
     t.boolean  :listing_approved, null: false, default: false
     t.timestamps                  null: false
   end
+
+  create_table :house_rooms, :force => true do |t|
+    t.integer    :house_id, null: false
+    t.string     :name,     null: false
+    t.integer    :area,     null: false
+    t.timestamps            null: false
+  end
 end

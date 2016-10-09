@@ -68,10 +68,35 @@ module OnForm
       define_method("#{name}=")                 { |arg| introduced_attribute_values.delete(name); introduced_attribute_values_before_type_cast[name] = arg }
     end
 
-    def self.take_identity_from(backing_model_name)
+    def self.take_identity_from(backing_model_name, convert_to_model: true)
       @identity_model_name = backing_model_name.to_sym
       expose_backing_model(@identity_model_name)
-      delegate :to_model, :to_key, :to_param, :persisted?, to: backing_model_name
+      delegate :id, :to_key, :to_param, :persisted?, :mark_for_destruction, :_destroy, :marked_for_destruction?, to: backing_model_name
+      delegate :to_model, to: backing_model_name if convert_to_model
+    end
+
+    def self.expose_collection_of(association_name, on: nil, prefix: nil, suffix: nil, as: nil, allow_insert: true, allow_update: true, allow_destroy: false, &block)
+      exposed_name = as || "#{prefix}#{association_name}#{suffix}"
+      singular_name = exposed_name.to_s.singularize
+      association_name = association_name.to_sym
+
+      on = prepare_model_to_expose!(on)
+
+      collection_form_class = Class.new(OnForm::Form)
+      const_set(exposed_name.to_s.classify + "Form", collection_form_class)
+
+      collection_form_class.send(:define_method, :initialize) { |record| @record = record }
+      collection_form_class.send(:attr_reader, :record)
+      collection_form_class.send(:alias_method, singular_name, :record)
+      collection_form_class.take_identity_from singular_name, convert_to_model: false
+      collection_form_class.class_eval(&block)
+
+      define_method(exposed_name) { collection_wrappers[association_name] ||= CollectionWrapper.new(backing_model_instance(on), association_name, collection_form_class, allow_insert, allow_update, allow_destroy) } # used by action_view's fields_for, and by the following lines
+      define_method("#{exposed_name}_attributes=") { |params| send(exposed_name).parse_collection_attributes(params) }
+      define_method("_save_#{exposed_name}_forms") { send(exposed_name).save_forms }
+      after_save :"_save_#{exposed_name}_forms"
+
+      collection_form_class
     end
 
   protected
@@ -81,6 +106,17 @@ module OnForm
 
     def introduced_attribute_values_before_type_cast
       @introduced_attribute_values_before_type_cast ||= {}
+    end
+
+    def collection_wrappers
+      @collection_wrappers ||= {}
+    end
+
+    def self.prepare_model_to_expose!(on)
+      raise ArgumentError, "must choose the model to expose the attributes on" unless on || identity_model_name
+      on = (on || identity_model_name).to_sym
+      expose_backing_model(on)
+      on
     end
   end
 end
