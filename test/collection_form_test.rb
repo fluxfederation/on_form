@@ -120,6 +120,15 @@ describe "forms including has_many collections" do
     room.area.must_equal 18
   end
 
+  it "returns false from valid? if a validation fails on the child records" do
+    proc do
+      @room_listing_form.update!(:city => "Fancyville", :rooms_attributes => { @rooms.first.id.to_s => { "id" => @rooms.first.id.to_s, "room_name" => "", :area => 9 }})
+    end.must_raise ActiveRecord::RecordInvalid
+
+    @room_listing_form.valid?.must_equal false
+    @room_listing_form.errors['rooms.room_name'].must_equal ["can't be blank"]
+  end
+
   it "returns the assigned instances from the association-like method for redisplay even if the form hasn't been saved" do
     @room_listing_form.attributes = { :city => "Fancyville", :rooms_attributes => [
       { :id => @rooms.first.id, :room_name => "Master bedroom" },
