@@ -2,7 +2,7 @@ module OnForm
   class CollectionWrapper
     include ::Enumerable
 
-    attr_reader :parent, :association_name, :collection_form_class, :allow_insert, :allow_update, :allow_destroy
+    attr_reader :parent, :association_name, :collection_form_class, :allow_insert, :allow_update, :allow_destroy, :loaded_forms
 
     delegate :each, :first, :last, :[], to: :to_a
 
@@ -38,6 +38,10 @@ module OnForm
           form.save!
         end
       end
+    end
+
+    def validate_forms
+      @loaded_forms.collect { |form| form.valid? }
     end
 
     def parse_collection_attributes(params)
