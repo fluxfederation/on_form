@@ -2,7 +2,7 @@ module OnForm
   class CollectionWrapper
     include ::Enumerable
 
-    attr_reader :parent, :association_name, :collection_form_class, :allow_insert, :allow_update, :allow_destroy, :loaded_forms
+    attr_reader :parent, :association_name, :collection_form_class, :allow_insert, :allow_update, :allow_destroy
 
     delegate :each, :first, :last, :[], to: :to_a
 
@@ -40,8 +40,10 @@ module OnForm
       end
     end
 
-    def validate_forms
-      @loaded_forms.collect { |form| form.valid? }
+    def validate_forms(parent_form)
+      @loaded_forms.collect do |form|
+        add_errors_to_parent(parent_form, form) if form.invalid?
+      end
     end
 
     def parse_collection_attributes(params)
@@ -88,8 +90,18 @@ module OnForm
     end
 
   protected
+
     def self.boolean_type
       @boolean_type ||= Types.lookup(:boolean, {})
+    end
+
+    def add_errors_to_parent(parent_form, child_form)
+      return unless child_form.errors.present?
+
+      association_exposed_name = child_form.class.identity_model_name.to_s.pluralize
+      child_form.errors.each do |attribute, errors|
+        Array(errors).each { |error| parent_form.errors["#{association_exposed_name}.#{attribute}"] << error }
+      end
     end
 
     def wrapped_record(record)
