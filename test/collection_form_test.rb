@@ -6,6 +6,7 @@ class RoomListingForm < OnForm::Form
   expose_collection_of :house_rooms, on: :house, as: :rooms, allow_insert: true, allow_update: true, allow_destroy: true do
     expose :name, as: :room_name
     expose :area
+    validates :room_name, length: { maximum: 100, too_long: "%{count} characters is the maximum allowed" }
   end
 
   def initialize(house)
@@ -131,10 +132,21 @@ describe "forms including has_many collections" do
             @rooms.first.id.to_s => { "id" => @rooms.first.id.to_s, "room_name" => "", :area => 9 }
           }
         )
-      end.must_raise ActiveRecord::RecordInvalid
+      end.must_raise ActiveModel::ValidationError
 
       @room_listing_form.valid?.must_equal false
       @room_listing_form.errors['rooms.room_name'].must_equal ["can't be blank"]
+  end
+
+  it "returns false from valid? if a validation fails on the child form validation" do
+    @room_listing_form.attributes= {
+      :rooms_attributes => {
+        @rooms.first.id.to_s => { "id" => @rooms.first.id.to_s, "room_name" => "x"*101, :area => 9 }
+      }
+    }
+
+    @room_listing_form.valid?.must_equal false
+    @room_listing_form.errors['rooms.room_name'].must_equal ["100 characters is the maximum allowed"]
   end
 
   it "returns the assigned instances from the association-like method for redisplay even if the form hasn't been saved" do
