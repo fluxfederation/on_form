@@ -81,7 +81,6 @@ module OnForm
       association_name = association_name.to_sym
 
       on = prepare_model_to_expose!(on)
-
       collection_form_class = Class.new(OnForm::Form)
       const_set(exposed_name.to_s.classify + "Form", collection_form_class)
 
@@ -91,8 +90,21 @@ module OnForm
       collection_form_class.take_identity_from singular_name, convert_to_model: false
       collection_form_class.class_eval(&block)
 
-      define_method(exposed_name) { collection_wrappers[association_name] ||= CollectionWrapper.new(backing_model_instance(on), association_name, collection_form_class, allow_insert, allow_update, allow_destroy) } # used by action_view's fields_for, and by the following lines
+      define_method(exposed_name) do
+        return collection_wrappers.dig(on, association_name, :form) if collection_wrappers.dig(on, association_name)
+
+        collection_wrappers[on] ||= {}
+        collection_wrappers[on][association_name] = {
+          form: CollectionWrapper.new(backing_model_instance(on), association_name, collection_form_class, allow_insert, allow_update, allow_destroy), # used by action_view's fields_for, and by the following lines
+          exposed_name: exposed_name
+        }
+
+        collection_wrappers.dig(on, association_name, :form)
+      end
+
       define_method("#{exposed_name}_attributes=") { |params| send(exposed_name).parse_collection_attributes(params) }
+      define_method("_validate_#{exposed_name}_forms") { send(exposed_name).validate_forms }
+      after_validation :"_validate_#{exposed_name}_forms"
       define_method("_save_#{exposed_name}_forms") { send(exposed_name).save_forms }
       after_save :"_save_#{exposed_name}_forms"
 
