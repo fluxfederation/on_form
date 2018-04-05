@@ -8,6 +8,10 @@ class PreferencesForm < OnForm::Form
   end
 end
 
+class PreferencesFormWithFormValidations < PreferencesForm
+  validates :name, length: { maximum: 10 }
+end
+
 describe "a basic single-model form" do
   before do
     Customer.delete_all
@@ -66,17 +70,17 @@ describe "a basic single-model form" do
     @preferences_form.valid?.must_equal false
   end
 
-  it "raises ActiveRecord::RecordInvalid from save! or update! if a validation fails" do
+  it "raises ActiveRecord::RecordInvalid from save! or update! if a record validation fails" do
     proc { @preferences_form.update!(email: nil) }.must_raise(ActiveRecord::RecordInvalid)
     proc { @preferences_form.save! }.must_raise(ActiveRecord::RecordInvalid)
   end
 
-  it "returns false from save or update if a validation fails" do
+  it "returns false from save or update if a record validation fails" do
     @preferences_form.update(email: nil).must_equal false
     @preferences_form.save.must_equal false
   end
 
-  it "exposes validation errors on attributes" do
+  it "exposes record validation errors on attributes" do
     @preferences_form.email = nil
     @preferences_form.save.must_equal false
     @preferences_form.errors.full_messages.must_equal ["Email can't be blank"]
@@ -90,6 +94,18 @@ describe "a basic single-model form" do
       @preferences_form.errors.full_messages.sort.must_equal ["Email can't be blank", "Name can't be blank"]
       @preferences_form.errors[:name].must_equal ["can't be blank"]
     end
+  end
+
+  it "raises ActiveModel::ValidationError from save! or update! if a form validation fails" do
+    @preferences_form = PreferencesFormWithFormValidations.new(@customer)
+    proc { @preferences_form.update!(name: "a"*11) }.must_raise(ActiveModel::ValidationError)
+    proc { @preferences_form.save! }.must_raise(ActiveModel::ValidationError)
+  end
+
+  it "returns false from save or update if a form validation fails" do
+    @preferences_form = PreferencesFormWithFormValidations.new(@customer)
+    @preferences_form.update(name: "a"*11).must_equal false
+    @preferences_form.save.must_equal false
   end
 
   it "exposes validation errors on base" do
