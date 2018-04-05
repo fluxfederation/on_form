@@ -23,6 +23,8 @@ module OnForm
       transaction do
         reset_errors
         unless run_validations!(backing_model_validations: false)
+          backing_model_instances.each(&:valid?)
+          collect_errors
           raise ActiveModel::ValidationError, self
         end
         run_callbacks :save do

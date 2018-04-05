@@ -95,6 +95,8 @@ describe "callbacks" do
     @logs.must_equal [
       "SaveCallbackForm before_validation",
       "SaveCallbackForm validate",
+      "CallbackHouse before_validation",
+      "CallbackHouse validate",
     ]
   end
 

@@ -108,6 +108,16 @@ describe "a basic single-model form" do
     @preferences_form.save.must_equal false
   end
 
+  it "adds both record and form validation errors if both fail" do
+    @preferences_form = PreferencesFormWithFormValidations.new(@customer)
+    proc { @preferences_form.update!(email: nil, name: "a"*11) }.must_raise(ActiveModel::ValidationError)
+    proc { @preferences_form.save! }.must_raise(ActiveModel::ValidationError)
+
+    @preferences_form.errors[:name].must_equal ["is too long (maximum is 10 characters)"]
+    @preferences_form.errors[:email].must_equal ["can't be blank"]
+    @preferences_form.errors.full_messages.must_equal ["Name is too long (maximum is 10 characters)", "Email can't be blank"]
+  end
+
   it "exposes validation errors on base" do
     @preferences_form.friendly?.must_equal true
     @preferences_form.friendly = false
