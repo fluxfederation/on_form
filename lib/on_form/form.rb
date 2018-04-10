@@ -1,11 +1,13 @@
 module OnForm
   class Form
+    attr_writer :backing_model_validations
     include ActiveModel::Validations
     include Validations
     include ActiveModel::Validations::Callbacks
 
     include Attributes
     include MultiparameterAttributes
+    include Validation
     include Errors
     include Saving
 
@@ -92,17 +94,17 @@ module OnForm
       collection_form_class.take_identity_from singular_name, convert_to_model: false
       collection_form_class.class_eval(&block)
 
-      define_method(exposed_name) do
-        collection_wrappers[association_name] ||= CollectionWrapper.new(backing_model_instance(on), association_name, collection_form_class, allow_insert, allow_update, allow_destroy) # used by action_view's fields_for, and by the following lines
-      end
-
+      define_method(exposed_name) { collection_wrappers[association_name] ||= CollectionWrapper.new(backing_model_instance(on), association_name, collection_form_class, allow_insert, allow_update, allow_destroy) } # used by action_view's fields_for, and by the following lines
       define_method("#{exposed_name}_attributes=") { |params| send(exposed_name).parse_collection_attributes(params) }
-      define_method("_validate_#{exposed_name}_forms") { send(exposed_name).validate_forms(self) }
-      validate :"_validate_#{exposed_name}_forms"
       define_method("_save_#{exposed_name}_forms") { send(exposed_name).save_forms }
       after_save :"_save_#{exposed_name}_forms"
 
       collection_form_class
+    end
+
+    def backing_model_validations
+      return @backing_model_validations if defined? @backing_model_validations
+      @backing_model_validations = true
     end
 
   protected

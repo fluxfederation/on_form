@@ -40,10 +40,22 @@ module OnForm
       end
     end
 
+    def run_forms_backing_models_validations(parent_form)
+      @loaded_forms.collect do |form|
+        form.run_backing_model_validation!
+        add_errors_to_parent(parent_form, form) if form.errors.present?
+      end
+    end
+
     def validate_forms(parent_form)
       @loaded_forms.collect do |form|
+        form.backing_model_validations = parent_form.backing_model_validations
         add_errors_to_parent(parent_form, form) if form.invalid?
       end
+    end
+
+    def reset_forms_errors
+      @loaded_forms.collect(&:reset_errors)
     end
 
     def parse_collection_attributes(params)
@@ -90,7 +102,6 @@ module OnForm
     end
 
   protected
-
     def self.boolean_type
       @boolean_type ||= Types.lookup(:boolean, {})
     end
@@ -101,6 +112,9 @@ module OnForm
       association_exposed_name = child_form.class.identity_model_name.to_s.pluralize
       child_form.errors.each do |attribute, errors|
         Array(errors).each { |error| parent_form.errors["#{association_exposed_name}.#{attribute}"] << error }
+        if parent_form.errors["#{association_exposed_name}.#{attribute}"].present?
+          parent_form.errors["#{association_exposed_name}.#{attribute}"].uniq!
+        end
       end
     end
 

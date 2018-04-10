@@ -132,9 +132,7 @@ describe "forms including has_many collections" do
             @rooms.first.id.to_s => { "id" => @rooms.first.id.to_s, "room_name" => "", :area => 9 }
           }
         )
-      end.must_raise ActiveModel::ValidationError
-
-      @room_listing_form.valid?.must_equal false
+      end.must_raise ActiveRecord::RecordInvalid
       @room_listing_form.errors['rooms.room_name'].must_equal ["can't be blank"]
   end
 
