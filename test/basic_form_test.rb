@@ -102,10 +102,24 @@ describe "a basic single-model form" do
     proc { @preferences_form.save! }.must_raise(ActiveModel::ValidationError)
   end
 
+  it "doesn't raise validation errors if save! is passed validate: false" do
+    @preferences_form = PreferencesFormWithFormValidations.new(@customer)
+    @preferences_form.name = "a"*11
+    @preferences_form.save!(validate: false)
+    @customer.reload.name.must_equal "a"*11
+  end
+
   it "returns false from save or update if a form validation fails" do
     @preferences_form = PreferencesFormWithFormValidations.new(@customer)
     @preferences_form.update(name: "a"*11).must_equal false
     @preferences_form.save.must_equal false
+  end
+
+  it "doesn't run validations or return false from save when passed validate: false" do
+    @preferences_form = PreferencesFormWithFormValidations.new(@customer)
+    @preferences_form.name = "a"*11
+    @preferences_form.save(validate: false).must_equal true
+    @customer.reload.name.must_equal "a"*11
   end
 
   it "adds both record and form validation errors if both fail" do

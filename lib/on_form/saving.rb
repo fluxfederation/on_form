@@ -14,17 +14,19 @@ module OnForm
       end
     end
 
-    def save!
+    def save!(validate: true)
       transaction do
         reset_errors
 
-        run_validations!
+        if validate
+          run_validations!
 
-        if !errors.empty?
-          if @_form_validation_errors
-            raise ActiveModel::ValidationError, self
-          else
-            raise ActiveRecord::RecordInvalid, self
+          if !errors.empty?
+            if @_form_validation_errors
+              raise ActiveModel::ValidationError, self
+            else
+              raise ActiveRecord::RecordInvalid, self
+            end
           end
         end
 
@@ -36,8 +38,8 @@ module OnForm
       true
     end
 
-    def save
-      save!
+    def save(validate: true)
+      save!(validate: validate)
     rescue ActiveRecord::RecordInvalid, ActiveModel::ValidationError
       false
     end
