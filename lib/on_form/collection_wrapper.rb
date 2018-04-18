@@ -30,28 +30,24 @@ module OnForm
       @association_proxy.size
     end
 
-    def save_forms
+    def save_forms(validate: true)
       @loaded_forms.each do |form|
         if form.marked_for_destruction?
           form.record.destroy
         else
-          form.save!
+          form.save!(validate: validate)
         end
-      end
-    end
-
-    def run_forms_backing_models_validations(parent_form)
-      @loaded_forms.collect do |form|
-        form.run_backing_model_validation!
-        add_errors_to_parent(parent_form, form) if form.errors.present?
       end
     end
 
     def validate_forms(parent_form)
       @loaded_forms.collect do |form|
-        form.backing_model_validations = parent_form.backing_model_validations
         add_errors_to_parent(parent_form, form) if form.invalid?
       end
+    end
+
+    def form_errors?
+      @loaded_forms.map(&:form_errors?).any?
     end
 
     def reset_forms_errors

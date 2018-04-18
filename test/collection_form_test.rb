@@ -126,24 +126,46 @@ describe "forms including has_many collections" do
   end
 
   it "returns false from valid? if a validation fails on the child records" do
-      proc do
-        @room_listing_form.update!(
-          :rooms_attributes => {
-            @rooms.first.id.to_s => { "id" => @rooms.first.id.to_s, "room_name" => "", :area => 9 }
-          }
-        )
-      end.must_raise ActiveRecord::RecordInvalid
-      @room_listing_form.errors['rooms.room_name'].must_equal ["can't be blank"]
+    @room_listing_form.attributes = {
+      :rooms_attributes => {
+        @rooms.first.id.to_s => { "id" => @rooms.first.id.to_s, "room_name" => "", :area => 9 }
+      }
+    }
+    @room_listing_form.valid?.must_equal false
+    @room_listing_form.errors['rooms.room_name'].must_equal ["can't be blank"]
   end
 
   it "returns false from valid? if a validation fails on the child form validation" do
-    @room_listing_form.attributes= {
+    @room_listing_form.attributes = {
       :rooms_attributes => {
         @rooms.first.id.to_s => { "id" => @rooms.first.id.to_s, "room_name" => "x"*101, :area => 9 }
       }
     }
 
     @room_listing_form.valid?.must_equal false
+    @room_listing_form.errors['rooms.room_name'].must_equal ["100 characters is the maximum allowed"]
+  end
+
+  it "raise ActiveModel::RecordInvalid if a validation fails on the child records" do
+    proc do
+      @room_listing_form.update!(
+        :rooms_attributes => {
+          @rooms.first.id.to_s => { "id" => @rooms.first.id.to_s, "room_name" => "", :area => 9 }
+        }
+      )
+    end.must_raise ActiveRecord::RecordInvalid
+    @room_listing_form.errors['rooms.room_name'].must_equal ["can't be blank"]
+  end
+
+  it "raise ActiveModel::ValidationError if a validation fails on the child form validation" do
+    proc do
+      @room_listing_form.update!(
+        :rooms_attributes => {
+          @rooms.first.id.to_s => { "id" => @rooms.first.id.to_s, "room_name" => "x"*101, :area => 9 }
+        }
+      )
+    end.must_raise ActiveModel::ValidationError
+
     @room_listing_form.errors['rooms.room_name'].must_equal ["100 characters is the maximum allowed"]
   end
 
