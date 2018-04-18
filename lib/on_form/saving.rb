@@ -19,7 +19,6 @@ module OnForm
     end
 
     def save!
-      reset_errors
       transaction do
         reset_errors
         unless run_validations!(backing_model_validations: false)
