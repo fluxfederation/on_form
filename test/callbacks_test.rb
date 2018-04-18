@@ -6,6 +6,7 @@ module TestCallbacks
 
     base.before_validation :log_before_validation
     base.validate          :log_validate
+    base.after_validation  :log_after_validation
 
     base.before_save :log_before_save
     base.after_save  :log_after_save
@@ -19,6 +20,10 @@ module TestCallbacks
 
   def log_validate
     save_logs_in << "#{self.class.name} validate" if save_logs_in
+  end
+
+  def log_after_validation
+    save_logs_in << "#{self.class.name} after_validation" if save_logs_in
   end
 
   def log_before_save
@@ -73,11 +78,13 @@ describe "callbacks" do
     @save_callback_form.save!
     @logs.must_equal [
       "SaveCallbackForm before_validation",
+      "CallbackHouse before_validation",
+      "CallbackHouse validate",
+      "CallbackHouse after_validation",
       "SaveCallbackForm validate",
+      "SaveCallbackForm after_validation",
       "SaveCallbackForm before_save",
       "SaveCallbackForm around_save begins",
-        "CallbackHouse before_validation",
-        "CallbackHouse validate",
         "CallbackHouse before_save",
         "CallbackHouse around_save begins",
         "CallbackHouse around_save ends",
@@ -94,9 +101,11 @@ describe "callbacks" do
     @save_callback_form.errors[:base].must_equal ["failing validation"]
     @logs.must_equal [
       "SaveCallbackForm before_validation",
-      "SaveCallbackForm validate",
       "CallbackHouse before_validation",
       "CallbackHouse validate",
+      "CallbackHouse after_validation",
+      "SaveCallbackForm validate",
+      "SaveCallbackForm after_validation",
     ]
   end
 
@@ -107,11 +116,21 @@ describe "callbacks" do
     @save_callback_form.errors[:base].must_equal ["failing validation"]
     @logs.must_equal [
       "SaveCallbackForm before_validation",
+      "CallbackHouse before_validation",
+      "CallbackHouse validate",
+      "CallbackHouse after_validation",
       "SaveCallbackForm validate",
-      "SaveCallbackForm before_save",
-      "SaveCallbackForm around_save begins",
-        "CallbackHouse before_validation",
-        "CallbackHouse validate",
+      "SaveCallbackForm after_validation",
     ]
+  end
+
+  it "collects the errors from backing models before after_validation callbacks fire" do
+    @house.street_number = nil
+    check_validation = -> {
+      @save_callback_form.errors[:street_number].must_equal ["can't be blank"]
+    }
+    @save_callback_form.stub(:log_after_validation, check_validation) do
+      proc { @save_callback_form.save! }.must_raise ActiveRecord::RecordInvalid
+    end
   end
 end

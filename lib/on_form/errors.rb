@@ -9,7 +9,7 @@ module OnForm
       @errors = nil
     end
 
-    def collect_errors
+    def collect_errors_from_backing_model_instances
       self.class.exposed_attributes.each do |backing_model_name, attribute_mappings|
         backing_model = backing_model_instance(backing_model_name)
 

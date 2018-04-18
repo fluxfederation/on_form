@@ -259,14 +259,16 @@ protected
 end
 ```
 
-Note that model save calls are nested inside the form save calls, which means that although form validation takes place before form save starts, model validation takes place after form saving begins.
+Model validations and validation callbacks occur between the form validation before and after callbacks, and model save calls are nested inside the form save calls, but the save calls all follow the validations and validation callbacks.
 
     form before_validation
+    model before_validation
+    model validate (validations defined on the model)
+    model after_validation
     form validate (validations defined on the form itself)
+    form after_validation
     form before_save
     form around_save begins
-      model before_validation
-      model validate (validations defined on the model)
       model before_save
       model around_save begins
         model saved

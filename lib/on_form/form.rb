@@ -1,6 +1,7 @@
 module OnForm
   class Form
     include ActiveModel::Validations
+    include Validations
     include ActiveModel::Validations::Callbacks
 
     include Attributes
