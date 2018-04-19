@@ -6,6 +6,7 @@ class RoomListingForm < OnForm::Form
   expose_collection_of :house_rooms, on: :house, as: :rooms, allow_insert: true, allow_update: true, allow_destroy: true do
     expose :name, as: :room_name
     expose :area
+    validates :room_name, length: { maximum: 100, too_long: "%{count} characters is the maximum allowed" }
   end
 
   def initialize(house)
@@ -112,12 +113,40 @@ describe "forms including has_many collections" do
       "0" => { "room_name" => "Kitchen", "area" => 18 },
     })
     @house.reload.city.must_equal "Fancyville"
+
+    # Update existing record
     @house.house_rooms.size.must_equal 3
     @rooms.last.reload.name.must_equal "Lounge"
     @rooms.last.area.must_equal 9
+
+    # Create new record
     room = @house.house_rooms.order(:id).last
     room.name.must_equal "Kitchen"
     room.area.must_equal 18
+  end
+
+  it "returns false from valid? if a validation fails on the child records" do
+      proc do
+        @room_listing_form.update!(
+          :rooms_attributes => {
+            @rooms.first.id.to_s => { "id" => @rooms.first.id.to_s, "room_name" => "", :area => 9 }
+          }
+        )
+      end.must_raise ActiveModel::ValidationError
+
+      @room_listing_form.valid?.must_equal false
+      @room_listing_form.errors['rooms.room_name'].must_equal ["can't be blank"]
+  end
+
+  it "returns false from valid? if a validation fails on the child form validation" do
+    @room_listing_form.attributes= {
+      :rooms_attributes => {
+        @rooms.first.id.to_s => { "id" => @rooms.first.id.to_s, "room_name" => "x"*101, :area => 9 }
+      }
+    }
+
+    @room_listing_form.valid?.must_equal false
+    @room_listing_form.errors['rooms.room_name'].must_equal ["100 characters is the maximum allowed"]
   end
 
   it "returns the assigned instances from the association-like method for redisplay even if the form hasn't been saved" do
