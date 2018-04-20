@@ -4,9 +4,14 @@ module OnForm
       @errors ||= ActiveModel::Errors.new(self)
     end
 
-  private
     def reset_errors
       @errors = nil
+      reset_errors_on_child_forms
+    end
+
+  private
+    def reset_errors_on_child_forms
+      collection_wrappers.each_value(&:reset_forms_errors)
     end
 
     def collect_errors_from_backing_model_instances

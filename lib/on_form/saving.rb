@@ -22,7 +22,7 @@ module OnForm
           run_validations!
 
           if !errors.empty?
-            if @_form_validation_errors
+            if form_errors?
               raise ActiveModel::ValidationError, self
             else
               raise ActiveRecord::RecordInvalid, self
@@ -33,6 +33,7 @@ module OnForm
         run_callbacks :save do
           # we pass (validate: false) to avoid running the validations a second time, but we use save! to get the RecordNotFound behavior
           backing_model_instances.each { |backing_model| backing_model.save!(validate: false) }
+          save_child_forms(validate: false)
         end
       end
       true
@@ -70,6 +71,10 @@ module OnForm
           with_transactions(models, &block)
         end
       end
+    end
+
+    def save_child_forms(validate: true)
+      collection_wrappers.each_value {|collection| collection.save_forms(validate: validate) }
     end
   end
 end
