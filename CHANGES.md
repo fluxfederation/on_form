@@ -1,9 +1,15 @@
 Changelog
 =========
 
+3.0.0
+-----
+* Support `save(validate: false)` and `save!(validate: false)`.
+* Change callback order to better match ActiveRecord: validation callbacks fire before `before_save` fires, and model callbacks fire before the form's `after_validation` callback fires.
+* Collect errors from collection forms and present them on the form itself.  Thanks @Dhamsoft.
+
 2.3.0
 -----
-* Add `take_identity_from` to improve interoperability with standard resource ('RESTful') controllers and form helpers
+* Add `take_identity_from` to improve interoperability with standard resource ('RESTful') controllers and form helpers.
 
 2.2.2
 -----

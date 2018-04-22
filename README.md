@@ -388,7 +388,7 @@ If you prefer, you can use the Rails `included` block syntax in the module inste
 
 After checking out the repo, pick the rails version you'd like to run tests against, and run:
 
-    RAILS_VERSION=5.0.0.1 bundle update
+    RAILS_VERSION=5.2.0 bundle update
 
 You should then be able to run the test suite:
 
