@@ -42,7 +42,7 @@ describe "introduced attributes" do
 
   it "doesn't confuse nil with 0" do
     @form = AttributeDefaultsForm.new
-    @form.integer_with_no_default.must_equal nil
+    @form.integer_with_no_default.must_be_nil
     @form.integer_with_no_default_changed?.must_equal false
 
     @form.integer_with_no_default = 0
@@ -58,7 +58,7 @@ describe "introduced attributes" do
     @form.integer_with_no_default_changed?.must_equal true
 
     @form.integer_with_no_default = ""
-    @form.integer_with_no_default.must_equal nil
+    @form.integer_with_no_default.must_be_nil
     @form.integer_with_no_default_changed?.must_equal false
 
     @form.integer_with_default.must_equal 42
@@ -73,14 +73,14 @@ describe "introduced attributes" do
     @form.integer_with_default_changed?.must_equal true
 
     @form.integer_with_default = ""
-    @form.integer_with_default.must_equal nil
+    @form.integer_with_default.must_be_nil
     @form.integer_with_default_changed?.must_equal true
 
     @form.integer_with_default = nil
-    @form.integer_with_default.must_equal nil
+    @form.integer_with_default.must_be_nil
     @form.integer_with_default_changed?.must_equal true
 
-    @form.integer_with_no_default_was.must_equal nil
+    @form.integer_with_no_default_was.must_be_nil
     @form.integer_with_default_was.must_equal 42
 
     @form.decimal_with_default.must_equal BigDecimal.new("12.34")

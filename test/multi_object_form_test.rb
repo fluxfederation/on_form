@@ -56,7 +56,7 @@ describe "multi-record form" do
   it "applies changes to all models in memory, but rolls back all saves if the first fails validation" do
     proc { @house_listing_form.update!(:street_name => "Small Street", :phone_number => "222-3333", :street_number => nil) }.must_raise ActiveRecord::RecordInvalid
 
-    @house.street_number.must_equal nil
+    @house.street_number.must_be_nil
     @house.street_name.must_equal "Small Street"
     @vendor.phone_number.must_equal "222-3333"
 
@@ -70,7 +70,7 @@ describe "multi-record form" do
 
     @house.street_name.must_equal "Small Street"
     @vendor.phone_number.must_equal "222-3333"
-    @vendor.name.must_equal nil
+    @vendor.name.must_be_nil
 
     @house.reload.street_name.must_equal "Main Street"
     @vendor.reload.phone_number.must_equal "123-4567"

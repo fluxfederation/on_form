@@ -203,6 +203,6 @@ describe "forms including has_many collections" do
 
   it "doesn't touch the autosave setting on the association by default, nor rely on it being on to pass the other tests" do
     # see comment in the previous test for the significance of this setting.
-    House._reflect_on_association(:house_rooms).options[:autosave].must_equal nil
+    House._reflect_on_association(:house_rooms).options[:autosave].must_be_nil
   end
 end
