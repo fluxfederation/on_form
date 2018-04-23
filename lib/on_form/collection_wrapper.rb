@@ -1,20 +1,18 @@
 module OnForm
   class CollectionWrapper
     include ::Enumerable
-    DEFAULT_OPTIONS = { allow_insert: true, allow_update: true, allow_destroy: false, reject_if: nil }
-    attr_reader :parent, :association_name, :collection_form_class, :options
+    attr_reader :parent, :association_name, :collection_form_class,
+                :allow_insert, :allow_update, :allow_destroy, :reject_if
 
     delegate :each, :first, :last, :[], to: :to_a
 
-    def initialize(parent, association_name, collection_form_class, options = {})
-      @options = DEFAULT_OPTIONS.merge(options)
-      @options.assert_valid_keys(:allow_insert, :allow_update, :allow_destroy, :reject_if)
-
+    def initialize(parent, association_name, collection_form_class, allow_insert: true, allow_update: true, allow_destroy: false, reject_if: nil)
       @parent = parent
       @association_name = association_name
       @association = parent.association(association_name)
       @association_proxy = parent.send(association_name)
       @collection_form_class = collection_form_class
+      @allow_insert, @allow_update, @allow_destroy, @reject_if = allow_insert, allow_update, allow_destroy, reject_if
       @wrapped_records = {}
       @wrapped_new_records = []
       @loaded_forms = []
@@ -67,11 +65,11 @@ module OnForm
         destroy = self.class.boolean_type.cast(attributes['_destroy']) || self.class.boolean_type.cast(attributes[:_destroy])
         if id = attributes['id'] || attributes[:id]
           if destroy
-            records_to_destroy << id.to_i if options[:allow_destroy]
-          elsif options[:allow_update] && !call_reject_if(attributes)
+            records_to_destroy << id.to_i if allow_destroy
+          elsif allow_update && !call_reject_if(attributes)
             records_to_update[id.to_i] = attributes.except('id', :id, '_destroy', :destroy)
           end
-        elsif !destroy && options[:allow_insert] && !call_reject_if(attributes)
+        elsif !destroy && allow_insert && !call_reject_if(attributes)
           records_to_insert << attributes.except('_destroy', :destroy)
         end
       end
@@ -124,7 +122,7 @@ module OnForm
     # rejected by calling the reject_if Symbol or Proc (if defined).
     # The reject_if option is defined by +expose_collection_of+.
     def call_reject_if(attributes)
-      case callback = options[:reject_if]
+      case callback = reject_if
       when Symbol
         @collection_form_class.method(callback).arity == 0 ? @collection_form_class.send(callback) : @collection_form_class.send(callback, attributes)
       when Proc

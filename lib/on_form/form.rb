@@ -76,16 +76,14 @@ module OnForm
       delegate :to_model, to: backing_model_name if convert_to_model
     end
 
-    def self.expose_collection_of(association_name, options = {} , &block)
-      default_options = { on: nil, prefix: nil, suffix: nil, as: nil}
-      options = default_options.merge(options)
-      options.assert_valid_keys(:on, :prefix, :suffix, :as, :allow_insert, :allow_update, :allow_destroy, :reject_if)
+    def self.expose_collection_of(association_name, on: nil, prefix: nil, suffix: nil, as: nil,
+                                  allow_insert: true, allow_update: true, allow_destroy: false, reject_if: nil, &block)
 
-      exposed_name = options[:as] || "#{options[:prefix]}#{association_name}#{options[:suffix]}"
+      exposed_name = as || "#{prefix}#{association_name}#{suffix}"
       singular_name = exposed_name.to_s.singularize
       association_name = association_name.to_sym
 
-      on = prepare_model_to_expose!(options[:on])
+      on = prepare_model_to_expose!(on)
 
       collection_form_class = Class.new(OnForm::Form)
       const_set(exposed_name.to_s.classify + "Form", collection_form_class)
@@ -100,7 +98,8 @@ module OnForm
       define_method(exposed_name) do
         collection_wrappers[association_name] ||= CollectionWrapper.new(
           backing_model_instance(on), association_name, collection_form_class,
-          options.slice(:allow_insert, :allow_update, :allow_destroy, :reject_if)
+          allow_insert: allow_insert, allow_update: allow_update,
+          allow_destroy: allow_destroy, reject_if: reject_if
         )
       end
       define_method("#{exposed_name}_attributes=") { |params| send(exposed_name).parse_collection_attributes(params) }
