@@ -3,7 +3,7 @@ require "test_helper"
 class RoomListingForm < OnForm::Form
   expose %i(street_number street_name city), on: :house
 
-  expose_collection_of :house_rooms, on: :house, as: :rooms, allow_insert: true, allow_update: true, allow_destroy: true do
+  expose_collection_of :house_rooms, :on => :house, :as => :rooms, :allow_insert => true, :allow_update => true, :allow_destroy => true do
     expose :name, as: :room_name
     expose :area
     validates :room_name, length: { maximum: 100, too_long: "%{count} characters is the maximum allowed" }
@@ -11,6 +11,24 @@ class RoomListingForm < OnForm::Form
 
   def initialize(house)
     @house = house
+  end
+end
+
+class RoomListingFormWithProcRejectCheck < RoomListingForm
+  expose_collection_of :house_rooms, :on => :house, :as => :rooms, :allow_insert => true, :allow_update => true, :allow_destroy => true, :reject_if => ->(a) { a['room_name'] == "REJECT_CHECKER" } do
+    expose :name, as: :room_name
+    expose :area
+  end
+end
+
+class RoomListingFormWithMethodRejectCheck < RoomListingForm
+  expose_collection_of :house_rooms, :on => :house, :as => :rooms, :allow_insert => true, :allow_update => true, :allow_destroy => true, :reject_if => :reject_checker do
+    expose :name, as: :room_name
+    expose :area
+
+    def self.reject_checker(attributes)
+      attributes['room_name'] == "REJECT_CHECKER"
+    end
   end
 end
 
@@ -105,6 +123,59 @@ describe "forms including has_many collections" do
     @house.reload.city.must_equal "Fancyville"
     @house.house_rooms.size.must_equal 0
     proc { @rooms.first.reload}.must_raise ActiveRecord::RecordNotFound
+  end
+
+  reject_if_option_shared_tests = -> do
+    it "ignores record if room_name is 'REJECT_CHECKER' on update" do
+      @room_listing_form.update!(
+        :rooms_attributes => {
+          @rooms.first.id.to_s => { "id" => @rooms.first.id.to_s, "room_name" => "REJECT_CHECKER", :area => 29 }
+        }
+      )
+
+      @house.reload
+      @house.house_rooms.size.must_equal 2
+      # Ignored on update
+      room = @house.house_rooms.order(:id).first
+      room.name.wont_equal "REJECT_CHECKER"
+      room.area.wont_equal 29
+    end
+
+    it "ignores record if room_name is 'REJECT_CHECKER' on create" do
+      @room_listing_form.update!(
+        :rooms_attributes => {
+          "0" => { "room_name" => "REJECT_CHECKER", "area" => 28 }
+        }
+      )
+
+      @house.reload
+      @house.house_rooms.size.must_equal 2 # Won't increase
+    end
+
+    it "doesn't ignore record if room_name is 'REJECT_CHECKER' on destroy" do
+      @room_listing_form.update!(
+        :rooms_attributes => {
+          @rooms.last.id.to_s => { "id" => @rooms.last.id.to_s, "room_name" => "REJECT_CHECKER", :area => 29, :_destroy => true }
+        }
+      )
+
+      @house.reload
+      @house.house_rooms.size.must_equal 1 # Decreased
+    end
+  end
+
+  describe "reject_if option as a symbol" do
+    before do
+      @room_listing_form = RoomListingFormWithMethodRejectCheck.new(@house)
+      reject_if_option_shared_tests.call
+    end
+  end
+
+  describe "reject_if option as a Proc" do
+    before do
+      @room_listing_form = RoomListingFormWithProcRejectCheck.new(@house)
+      reject_if_option_shared_tests.call
+    end
   end
 
   it "accepts hash syntax for records" do
