@@ -3,7 +3,7 @@ require "test_helper"
 class RoomListingForm < OnForm::Form
   expose %i(street_number street_name city), on: :house
 
-  expose_collection_of :house_rooms, :on => :house, :as => :rooms, :allow_insert => true, :allow_update => true, :allow_destroy => true do
+  expose_collection_of :house_rooms, on: :house, as: :rooms, allow_insert: true, allow_update: true, allow_destroy: true do
     expose :name, as: :room_name
     expose :area
     validates :room_name, length: { maximum: 100, too_long: "%{count} characters is the maximum allowed" }

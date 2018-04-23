@@ -122,11 +122,11 @@ module OnForm
     # rejected by calling the reject_if Symbol or Proc (if defined).
     # The reject_if option is defined by +expose_collection_of+.
     def call_reject_if(attributes)
-      case callback = reject_if
+      case reject_if
       when Symbol
-        @collection_form_class.method(callback).arity == 0 ? @collection_form_class.send(callback) : @collection_form_class.send(callback, attributes)
+        @collection_form_class.method(reject_if).arity == 0 ? @collection_form_class.send(reject_if) : @collection_form_class.send(reject_if, attributes)
       when Proc
-        callback.call(attributes)
+        reject_if.call(attributes)
       else
         false
       end
