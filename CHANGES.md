@@ -1,6 +1,10 @@
 Changelog
 =========
 
+3.1.0
+-----
+* Support `reject_if` option on `expose_collection_of`.  Thanks @Dhamsoft.
+
 3.0.0
 -----
 * Support `save(validate: false)` and `save!(validate: false)`.
