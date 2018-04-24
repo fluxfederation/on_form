@@ -76,7 +76,9 @@ module OnForm
       delegate :to_model, to: backing_model_name if convert_to_model
     end
 
-    def self.expose_collection_of(association_name, on: nil, prefix: nil, suffix: nil, as: nil, allow_insert: true, allow_update: true, allow_destroy: false, &block)
+    def self.expose_collection_of(association_name, on: nil, prefix: nil, suffix: nil, as: nil,
+                                  allow_insert: true, allow_update: true, allow_destroy: false, reject_if: nil, &block)
+
       exposed_name = as || "#{prefix}#{association_name}#{suffix}"
       singular_name = exposed_name.to_s.singularize
       association_name = association_name.to_sym
@@ -92,7 +94,14 @@ module OnForm
       collection_form_class.take_identity_from singular_name, convert_to_model: false
       collection_form_class.class_eval(&block)
 
-      define_method(exposed_name) { collection_wrappers[association_name] ||= CollectionWrapper.new(backing_model_instance(on), association_name, collection_form_class, allow_insert, allow_update, allow_destroy) } # used by action_view's fields_for, and by the following lines
+      # used by action_view's fields_for, and by the following lines
+      define_method(exposed_name) do
+        collection_wrappers[association_name] ||= CollectionWrapper.new(
+          backing_model_instance(on), association_name, collection_form_class,
+          allow_insert: allow_insert, allow_update: allow_update,
+          allow_destroy: allow_destroy, reject_if: reject_if
+        )
+      end
       define_method("#{exposed_name}_attributes=") { |params| send(exposed_name).parse_collection_attributes(params) }
 
       collection_form_class

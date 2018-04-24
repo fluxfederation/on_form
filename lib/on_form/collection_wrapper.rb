@@ -1,18 +1,18 @@
 module OnForm
   class CollectionWrapper
     include ::Enumerable
-
-    attr_reader :parent, :association_name, :collection_form_class, :allow_insert, :allow_update, :allow_destroy
+    attr_reader :parent, :association_name, :collection_form_class,
+                :allow_insert, :allow_update, :allow_destroy, :reject_if
 
     delegate :each, :first, :last, :[], to: :to_a
 
-    def initialize(parent, association_name, collection_form_class, allow_insert, allow_update, allow_destroy)
+    def initialize(parent, association_name, collection_form_class, allow_insert: true, allow_update: true, allow_destroy: false, reject_if: nil)
       @parent = parent
       @association_name = association_name
       @association = parent.association(association_name)
       @association_proxy = parent.send(association_name)
       @collection_form_class = collection_form_class
-      @allow_insert, @allow_update, @allow_destroy = allow_insert, allow_update, allow_destroy
+      @allow_insert, @allow_update, @allow_destroy, @reject_if = allow_insert, allow_update, allow_destroy, reject_if
       @wrapped_records = {}
       @wrapped_new_records = []
       @loaded_forms = []
@@ -66,11 +66,11 @@ module OnForm
         if id = attributes['id'] || attributes[:id]
           if destroy
             records_to_destroy << id.to_i if allow_destroy
-          else
-            records_to_update[id.to_i] = attributes.except('id', :id, '_destroy', :destroy) if allow_update
+          elsif allow_update && !call_reject_if(attributes)
+            records_to_update[id.to_i] = attributes.except('id', :id, '_destroy', :destroy)
           end
-        elsif !destroy
-          records_to_insert << attributes.except('_destroy', :destroy) if allow_insert
+        elsif !destroy && allow_insert && !call_reject_if(attributes)
+          records_to_insert << attributes.except('_destroy', :destroy)
         end
       end
 
@@ -116,6 +116,20 @@ module OnForm
 
     def wrapped_record(record)
       @wrapped_records[record] ||= @collection_form_class.new(record).tap { |form| @loaded_forms << form }
+    end
+
+    # Determines if a record with the particular +attributes+ should be
+    # rejected by calling the reject_if Symbol or Proc (if defined).
+    # The reject_if option is defined by +expose_collection_of+.
+    def call_reject_if(attributes)
+      case reject_if
+      when Symbol
+        @collection_form_class.method(reject_if).arity == 0 ? @collection_form_class.send(reject_if) : @collection_form_class.send(reject_if, attributes)
+      when Proc
+        reject_if.call(attributes)
+      else
+        false
+      end
     end
   end
 end
