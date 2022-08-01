@@ -63,7 +63,7 @@ module OnForm
 
       params.each do |attributes|
         destroy = self.class.boolean_type.cast(attributes['_destroy']) || self.class.boolean_type.cast(attributes[:_destroy])
-        if id = attributes['id'] || attributes[:id]
+        if (id = attributes['id'] || attributes[:id])
           if destroy
             records_to_destroy << id.to_i if allow_destroy
           elsif allow_update && !call_reject_if(attributes)
@@ -77,7 +77,7 @@ module OnForm
       to_a if @association_proxy.loaded?
       records_to_load = records_to_update.keys + records_to_destroy - @wrapped_records.keys.collect(&:id)
       @association_proxy.find(records_to_load).each do |record|
-        @association.add_to_target(record, :skip_callbacks)
+        @association.add_to_target(record, skip_callbacks: true)
         wrapped_record(record)
       end
       loaded_forms_by_id = @wrapped_records.values.index_by(&:id)
@@ -97,10 +97,11 @@ module OnForm
       params
     end
 
-  protected
     def self.boolean_type
       @boolean_type ||= Types.lookup(:boolean, {})
     end
+
+    protected
 
     def add_errors_to_parent(parent_form, child_form)
       return unless child_form.errors.present?
