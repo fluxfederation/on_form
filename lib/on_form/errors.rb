@@ -27,7 +27,7 @@ module OnForm
     end
 
     def collect_errors_on(backing_model, exposed_name, backing_name)
-      Array(backing_model.errors[backing_name]).each { |error| errors[exposed_name] << error }
+      Array(backing_model.errors[backing_name]).each { |error| errors.add(exposed_name, error) }
     end
   end
 end
