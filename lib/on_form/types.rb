@@ -12,7 +12,7 @@ module OnForm
     if ActiveRecord::Type.methods.include?(:lookup)
       def self.lookup(type, options)
         default = options.delete(:default)
-        Type.new(ActiveRecord::Type.lookup(type, options), default)
+        Type.new(ActiveRecord::Type.lookup(type, **options), default)
       end
 
       class Type
