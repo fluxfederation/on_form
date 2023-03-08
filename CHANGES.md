@@ -1,6 +1,15 @@
 Changelog
 =========
 
+3.1.3
+* Fix issue in Collection Wrapper which was still using deprecated Rails functionality
+
+3.1.2
+* Fix Ruby 3 deprecations
+
+3.1.1
+* Make Gem compatible with Rails 6.1
+
 3.1.0
 -----
 * Support `reject_if` option on `expose_collection_of`.  Thanks @Dhamsoft.
