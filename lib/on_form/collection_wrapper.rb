@@ -107,10 +107,12 @@ module OnForm
       return unless child_form.errors.present?
 
       association_exposed_name = child_form.class.identity_model_name.to_s.pluralize
-      child_form.errors.each do |attribute, errors|
-        Array(errors).each { |error| parent_form.errors["#{association_exposed_name}.#{attribute}"] << error }
-        if parent_form.errors["#{association_exposed_name}.#{attribute}"].present?
-          parent_form.errors["#{association_exposed_name}.#{attribute}"].uniq!
+
+      grouped_child_form_errors = child_form.errors.group_by(&:attribute).transform_values { |error_array| error_array.map(&:message).uniq }
+
+      grouped_child_form_errors.each do |attribute, error_messages|
+        error_messages.each do |error_message|
+          parent_form.errors.add("#{association_exposed_name}.#{attribute}", error_message)
         end
       end
     end
